@@ -35,8 +35,6 @@ private slots:
 
     void on_chooseFileBtn_clicked();
 
-    void on_previewFileBtn_clicked();
-
     void on_tcpSendFileBtn_clicked();
 
     void dataSent(qint64 bytesSent);
@@ -50,14 +48,17 @@ private slots:
 
     void on_pushButton_5_clicked();
 
+    void uservRDRD();
 private:
     Ui::Widget *ui;
     QUdpSocket *us;
+    QUdpSocket *userv;
     QTcpSocket *ts;
     NetworkCommunicationSystem nsys;
     QScreen *screen;
-
+public:
     QTcpSocket *controlSocket;
     void paintEvent(QPaintEvent *event) override;
+    void findMACByIP(QString ip);
 };
 #endif // WIDGET_H

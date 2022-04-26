@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>网络对话</string>
   </property>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="sendMsgBtn">
    <property name="geometry">
     <rect>
      <x>530</x>
@@ -26,7 +26,7 @@
     <string>发送</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textEdit">
+  <widget class="QTextEdit" name="msgEdit">
    <property name="geometry">
     <rect>
      <x>270</x>

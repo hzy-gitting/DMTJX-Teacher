@@ -5,7 +5,7 @@
 NetworkCommunicationSystem::NetworkCommunicationSystem(QObject *parent) : QObject(parent)
 {
     udpSocket = new QUdpSocket();
-    /*QList ifs = QNetworkInterface::allInterfaces();
+    QList ifs = QNetworkInterface::allInterfaces();
     for(int i=0;i<ifs.size();i++){
         qDebug()<<ifs[i].name();
         qDebug()<<ifs[i].humanReadableName();
@@ -13,7 +13,7 @@ NetworkCommunicationSystem::NetworkCommunicationSystem(QObject *parent) : QObjec
         qDebug()<<ifs[i].flags();
         qDebug()<<ifs[i].hardwareAddress();
     }
-    qDebug() << QNetworkInterface::allAddresses();*/
+    qDebug() << QNetworkInterface::allAddresses();
 }
 //发送tcp数据，返回成功布尔值
 bool NetworkCommunicationSystem::tcpSendData(char *data, int size, QHostAddress addr, int port)

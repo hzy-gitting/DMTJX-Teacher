@@ -15,6 +15,9 @@ public:
     explicit MessageForm(QWidget *parent = nullptr);
     ~MessageForm();
 
+private slots:
+    void on_sendMsgBtn_clicked();
+
 private:
     Ui::MessageForm *ui;
 };

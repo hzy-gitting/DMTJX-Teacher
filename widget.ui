@@ -13,29 +13,6 @@
   <property name="windowTitle">
    <string>教师端</string>
   </property>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>30</y>
-     <width>101</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>接收的消息：</string>
-   </property>
-  </widget>
-  <widget class="QTextEdit" name="textEdit">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>60</y>
-     <width>281</width>
-     <height>201</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
@@ -162,19 +139,6 @@
     <string/>
    </property>
   </widget>
-  <widget class="QPushButton" name="previewFileBtn">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>510</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>预览文件</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="tcpSendFileBtn">
    <property name="geometry">
     <rect>
@@ -277,6 +241,16 @@
    </property>
    <property name="text">
     <string>网络对话</string>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>60</y>
+     <width>361</width>
+     <height>231</height>
+    </rect>
    </property>
   </widget>
  </widget>
