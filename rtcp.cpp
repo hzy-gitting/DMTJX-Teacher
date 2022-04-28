@@ -47,6 +47,7 @@ void RTCP::newConn(){
             return ;
         }
         NetStudent *stu = new NetStudent();
+        connect(s,&QTcpSocket::readyRead,stu,&NetStudent::slotReadyRead);
         stu->setStuId(sId); //分配Id
         sId++;
         stu->setSocket(s);  //关联socket

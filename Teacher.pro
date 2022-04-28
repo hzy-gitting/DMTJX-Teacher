@@ -16,6 +16,7 @@ SOURCES += \
     MonitorMaster.cpp \
     ffmpeg.cpp \
     ffmpegEncoder.cpp \
+    filereceiver.cpp \
     main.cpp \
     messageform.cpp \
     netstudent.cpp \
@@ -40,6 +41,7 @@ HEADERS += \
     MonitorMaster.h \
     ffmpeg.h \
     ffmpegEncoder.h \
+    filereceiver.h \
     messageform.h \
     netstudent.h \
     network/networkcommunicationsystem.h \
