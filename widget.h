@@ -49,6 +49,8 @@ private slots:
     void on_pushButton_5_clicked();
 
     void uservRDRD();
+    void on_openFileRcvDirBtn_clicked();
+
 private:
     Ui::Widget *ui;
     QUdpSocket *us;

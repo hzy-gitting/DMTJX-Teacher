@@ -566,3 +566,16 @@ void Widget::on_pushButton_2_clicked()
     return 0;
 }
 */
+//查看学生提交的作业（打开文件接收目录）
+void Widget::on_openFileRcvDirBtn_clicked()
+{
+    ShellExecuteA(NULL,"open",NULL,NULL,"E:/teacherRcv",SW_SHOWNORMAL);
+}
+
+//远程开机
+void Widget::on_remoteWakeBtn_clicked()
+{
+    //发送magic pakcet
+
+}
+
