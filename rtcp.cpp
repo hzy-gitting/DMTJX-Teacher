@@ -2,6 +2,8 @@
 #include<QDataStream>
 #include<QTcpServer>
 #include<WinSock2.h>
+#include<QHostInfo>
+#include"networkutils.h"
 
 RTCP * RTCP::pInst = nullptr;
 
@@ -10,14 +12,14 @@ void RTCP::init()
 {
     //服务器创建
     rtcpSrv = new QTcpServer;
+    connect(rtcpSrv,&QTcpServer::newConnection,this,&RTCP::newConn);
     //服务器开始监听
-    if(!rtcpSrv->listen(QHostAddress::Any,8999)){
+    if(!rtcpSrv->listen(QHostAddress::AnyIPv4,8999)){
         qDebug()<<"rtcp服务器监听失败！";
     }
-    connect(rtcpSrv,&QTcpServer::newConnection,this,&RTCP::newConn);
+    qDebug()<<"主机名："<<QHostInfo::localHostName();
 
 }
-
 RTCP::RTCP()
 {
     init();
@@ -39,19 +41,27 @@ void RTCP::newConn(){
     static int sId = 1;
     if(rtcpSrv->hasPendingConnections()){
         QTcpSocket *s = rtcpSrv->nextPendingConnection();
-        SOCKET nativeSkt = s->socketDescriptor();
+        NetStudent *stu = new NetStudent();
+        stu->setStuId(sId); //分配Id
+        sId++;
+        stu->setSocket(s);  //关联socket
+        connect(s,&QTcpSocket::readyRead,stu,&NetStudent::slotReadyRead);
+        /*SOCKET nativeSkt = s->socketDescriptor();
         char chOpt = 1;
         int ret = setsockopt(nativeSkt,IPPROTO_TCP,TCP_NODELAY,&chOpt,sizeof(char));
         if(ret == -1){
             qDebug()<<"setsockopt fail";
             return ;
+        }*/
+        char macAddr[6]={0};
+        if(!NetworkUtils::getMacAddrByIp(macAddr,s->peerAddress())){
+            qDebug()<<"获取学生端mac地址失败";
         }
-        NetStudent *stu = new NetStudent();
-        connect(s,&QTcpSocket::readyRead,stu,&NetStudent::slotReadyRead);
-        stu->setStuId(sId); //分配Id
-        sId++;
-        stu->setSocket(s);  //关联socket
+        stu->setMacAddr(macAddr);
         stuList.append(stu);        //添加到学生列表
+        //发出新学生连接信号
+        newStudentConnection(stu->getStuId(),s->peerAddress(),s->peerPort(),macAddr);
+
         qDebug()<<"学生 ip:"<<s->peerAddress()<<" port="<<s->peerPort()<<" 已连接RTCP";
     }
 }
@@ -95,6 +105,7 @@ bool RTCP::sendFileData(int sId,QByteArray data){
     }*/
     return true;
 }
+
 NetStudent *RTCP::findStudentById(int stuId)
 {
     for(int i=0;i<stuList.size();i++){

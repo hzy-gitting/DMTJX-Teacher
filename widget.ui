@@ -240,6 +240,19 @@
     <string>查看提交的作业</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="remoteWakeBtn">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>500</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>远程开机</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

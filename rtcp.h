@@ -30,6 +30,8 @@ public:
     bool sendFileData(int sId, QByteArray data);
 private slots:
     void newConn();
+signals:
+    void newStudentConnection(int sId,QHostAddress ip,qint32 port,char macAddr[]);
 };
 
 #endif // RTCP_H

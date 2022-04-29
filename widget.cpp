@@ -24,21 +24,38 @@
 #include<iphlpapi.h>
 #include"sendfiledialog.h"
 #include<QProgressBar>
+#include"networkutils.h"
+#include"rtcp.h"
+#include<QMenuBar>
+#include<QMenu>
+#include<QAction>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    //初始化菜单
+    QMenuBar *menuBar =  new QMenuBar(this);
+    QMenu *functionMenu = menuBar->addMenu("功能菜单");
+    QMenu *setupMenu = menuBar->addMenu("设置");
+    QAction *infoAction = setupMenu->addAction("主机信息");
+    //connect
 
+
+    //初始化学生列表
+    bool sucConn = (bool)connect(RTCP::getInstance(),&RTCP::newStudentConnection,
+            this,&Widget::studentTableAddItem);
+    if(!sucConn){
+        QMessageBox::information(this,"tips","connect fail");
+        qDebug()<<"connect fail";
+    }
     ui->tableWidget->setColumnCount(3);
     ui->tableWidget->setRowCount(2);
     ui->tableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("ip"));
     ui->tableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("port"));
     ui->tableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("MAC地址"));
-    QProgressBar *pgb = new QProgressBar;
-    pgb->setValue(100);
-    ui->tableWidget->setCellWidget(0,2,pgb);
+
     us=new QUdpSocket();
     us->connectToHost(QHostAddress::LocalHost,8890);
     connect(us,&QUdpSocket::bytesWritten,this,&Widget::written);
@@ -50,6 +67,8 @@ Widget::Widget(QWidget *parent)
     userv->bind(QHostAddress("192.168.31.222"),8891);
 
     connect(userv,&QUdpSocket::readyRead,this,&Widget::uservRDRD);
+
+
     MIB_IPNETTABLE ipNetTab;
     ULONG tabSize = sizeof(ipNetTab);
     ULONG ret = GetIpNetTable(&ipNetTab,&tabSize,TRUE);
@@ -76,12 +95,12 @@ Widget::Widget(QWidget *parent)
 
     //输出IPNETTTABLE
     int inum = pINTab->dwNumEntries;
-    QHostAddress addr;
+    QHostAddress ip;
     for(int i=0;i<inum;i++){
-        addr.setAddress(pINTab->table[i].dwAddr);
         struct in_addr addr;
         addr.S_un.S_addr = pINTab->table[i].dwAddr;
-        printf("ip:%s  ",inet_ntoa(addr));
+        ip.setAddress(inet_ntoa(addr));
+        qDebug()<<"ip:"<< ip;
         for(int j=0;j<pINTab->table[i].dwPhysAddrLen;j++){
             printf("%02x",pINTab->table[i].bPhysAddr[j]);
             if(j < pINTab->table[i].dwPhysAddrLen - 1){
@@ -90,6 +109,9 @@ Widget::Widget(QWidget *parent)
         }
         printf("\n");
     }
+
+
+
     ts=new QTcpSocket();
     connect(ts,&QTcpSocket::connected,this,&Widget::tcpConnected);
     connect(ts,&QTcpSocket::readyRead,this,&Widget::tcpReadyRead);
@@ -100,7 +122,6 @@ Widget::Widget(QWidget *parent)
     controlSocket = new QTcpSocket();
     controlSocket->connectToHost(QHostAddress::LocalHost,8888);//连接到学生
 
-    screen = QGuiApplication::primaryScreen();
 
     //学生探测
     stuDetect();
@@ -110,7 +131,10 @@ Widget::~Widget()
 {
     delete ui;
 }
-
+void Widget::studentTableAddItem(int sId,QHostAddress ip,qint32 port,char macAddr[]){
+    qDebug()<<"新学生连接到RTCP id="<<sId<<" ip="<<ip<<" port="
+        <<port<<" MAC地址 "<<NetworkUtils::macToString(macAddr);
+}
 void Widget::written(qint64 bytesWritten){
 
 }
@@ -326,7 +350,7 @@ void Widget::stuDetect(){
     dg->setData(QByteArray("detect"));
     //dg->setSender(QHostAddress("192.168.173.1"),12345);
 
-    dg->setDestination(QHostAddress::Broadcast,8900);//探测端口默认8900，广播
+    dg->setDestination(QHostAddress::Broadcast,8900);//探测端口默认8900，ip为受限广播地址，只探测本网段所有主机
     if(-1 == userv->writeDatagram(*dg)){
         qDebug()<<"detect fail:"<<userv->error();
     }
@@ -576,6 +600,25 @@ void Widget::on_openFileRcvDirBtn_clicked()
 void Widget::on_remoteWakeBtn_clicked()
 {
     //发送magic pakcet
+    /*幻数据包是一个广播帧，包含目标计算机的MAC地址。
+     * 由于 MAC 地址的唯一性，使数据包可以在网络中被唯一的识别。
+     * 幻数据包发送通常使用无连接的传输协议，如 UDP ，
+     * 发送端口为 7 或 9 ，这只是通常做法，没有限制。
+    幻数据包最简单的构成是6字节的255（FF FF FF FF FF FF FF），
+    紧接着为目标计算机的48位MAC地址，重复16次，数据包共计102字节。
+    有时数据包内还会紧接着4-6字节的密码信息。这个帧片段可以包含在任何协议中
+    ，最常见的是包含在 UDP 中。*/
 
+     char macAddr[6];
+    if(!NetworkUtils::getMacAddrByIp(macAddr,QHostAddress("192.168.31.1"))){
+        qDebug()<<"getMacAddrByIp failed";
+        return;
+    }
+    qDebug()<<"macAddr="<<NetworkUtils::macToString(macAddr);
+    if(!NetworkUtils::sendMagicPacket(userv,macAddr)){
+        qDebug()<<"sendMagicPacket failed";
+        return;
+    }
 }
+
 

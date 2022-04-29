@@ -24,6 +24,7 @@ SendFileDialog::SendFileDialog(QWidget *parent) :
 
 }
 
+
 SendFileDialog::~SendFileDialog()
 {
     delete ui;

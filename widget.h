@@ -51,6 +51,9 @@ private slots:
     void uservRDRD();
     void on_openFileRcvDirBtn_clicked();
 
+    void on_remoteWakeBtn_clicked();
+
+    void studentTableAddItem(int sId, QHostAddress ip, qint32 port, char macAddr[]);
 private:
     Ui::Widget *ui;
     QUdpSocket *us;

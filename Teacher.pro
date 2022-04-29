@@ -21,11 +21,11 @@ SOURCES += \
     messageform.cpp \
     netstudent.cpp \
     network/networkcommunicationsystem.cpp \
+    networkutils.cpp \
     rgb2yuv.cpp \
     rtcp.cpp \
     sendfiledialog.cpp \
     teachersndmsgwindow.cpp \
-    ttt.cpp \
     widget.cpp
 
 LIBS +=User32.LIB
@@ -45,11 +45,11 @@ HEADERS += \
     messageform.h \
     netstudent.h \
     network/networkcommunicationsystem.h \
+    networkutils.h \
     rgb2yuv.h \
     rtcp.h \
     sendfiledialog.h \
     teachersndmsgwindow.h \
-    ttt.h \
     widget.h
 
 FORMS += \

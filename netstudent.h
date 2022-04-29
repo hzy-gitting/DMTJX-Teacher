@@ -14,6 +14,7 @@ private:
     QString computerName;   //计算机名
     QTcpSocket *socket;     //教师端与学生关联的套接字
     FileReceiver *frcver;   //文件接收
+    char macAddr[6];        //学生端mac地址
 
 public:
     explicit NetStudent(QObject *parent = nullptr);
@@ -24,6 +25,11 @@ public:
     void setStuId(int newStuId);
     QTcpSocket *getSocket() const;
     void setSocket(QTcpSocket *newSocket);
+    void setMacAddr(const char mac[]);
+    void getMacAddr(char mac[]);
+    const QString &getComputerName() const;
+    void setComputerName(const QString &newComputerName);
+
 public slots:
     void slotReadyRead();
 };

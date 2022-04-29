@@ -21,6 +21,30 @@ void NetStudent::setSocket(QTcpSocket *newSocket)
     socket = newSocket;
 }
 
+void NetStudent::setMacAddr(const char mac[])
+{
+    for(int i=0;i<6;i++){
+        macAddr[i]=mac[i];
+    }
+}
+
+void NetStudent::getMacAddr(char mac[])
+{
+    for(int i=0;i<6;i++){
+        mac[i]=macAddr[i];
+    }
+}
+
+const QString &NetStudent::getComputerName() const
+{
+    return computerName;
+}
+
+void NetStudent::setComputerName(const QString &newComputerName)
+{
+    computerName = newComputerName;
+}
+
 NetStudent::NetStudent(QObject *parent):QObject(parent)
 {
     stuId = -2;
