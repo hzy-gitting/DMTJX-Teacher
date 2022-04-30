@@ -8,6 +8,18 @@ ParameterSetttingDialog::ParameterSetttingDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    showNetworkAdapterList();
+}
+
+ParameterSetttingDialog::~ParameterSetttingDialog()
+{
+    delete ui;
+}
+
+//展示网络适配器列表
+void ParameterSetttingDialog::showNetworkAdapterList()
+{
+
     QString sItem;
     //查找所有网络接口信息
     QList ifs = QNetworkInterface::allInterfaces();
@@ -29,6 +41,7 @@ ParameterSetttingDialog::ParameterSetttingDialog(QWidget *parent) :
                 sItem.append(addrEntry.netmask().toString());
                 sItem.append(")");
                 QListWidgetItem *newItem = new QListWidgetItem;
+                newItem->setData(Qt::UserRole,ifs[i].hardwareAddress());
                 newItem->setText(sItem);
                 newItem->setToolTip(sItem);
                 ui->networkAdapterList->addItem(newItem);
@@ -36,9 +49,25 @@ ParameterSetttingDialog::ParameterSetttingDialog(QWidget *parent) :
         }
         sItem.clear();
     }
+    ui->networkAdapterList->setVisible(true);
 }
 
-ParameterSetttingDialog::~ParameterSetttingDialog()
+//更改网络适配器选择
+void ParameterSetttingDialog::on_networkAdapterList_itemSelectionChanged()
 {
-    delete ui;
+    qDebug()<<__FUNCTION__;
+    qDebug() << ui->networkAdapterList->currentItem()->data(Qt::UserRole);
 }
+
+//保存最新参数设置
+void ParameterSetttingDialog::on_saveSettingBtn_clicked()
+{
+
+}
+
+//关闭窗口
+void ParameterSetttingDialog::on_closeBtn_clicked()
+{
+    close();
+}
+

@@ -8,33 +8,42 @@
 RTCP * RTCP::pInst = nullptr;
 
 //远程教学控制协议初始化
-void RTCP::init()
+void RTCP::init(QHostAddress ipAddr,quint16 port)
 {
     //服务器创建
     rtcpSrv = new QTcpServer;
     connect(rtcpSrv,&QTcpServer::newConnection,this,&RTCP::newConn);
     //服务器开始监听
-    if(!rtcpSrv->listen(QHostAddress::AnyIPv4,8999)){
+    if(!rtcpSrv->listen(ipAddr,port)){
         qDebug()<<"rtcp服务器监听失败！";
+        return;
     }
     qDebug()<<"主机名："<<QHostInfo::localHostName();
 
 }
-RTCP::RTCP()
+RTCP::RTCP(QHostAddress ipAddr,quint16 port)
 {
-    init();
+    init(ipAddr,port);
 }
 
-void RTCP::start(){
+bool RTCP::start(QHostAddress ipAddr,quint16 port){
     if(pInst == nullptr){
-        pInst = new RTCP;
+        pInst = new RTCP(ipAddr,port);
+    }
+    if(pInst->rtcpSrv->isListening()){
+        qDebug()<<"RTCP 启动成功，端口号="<<port<<" 监听ip="<<ipAddr;
+        return true;
+    }
+    else{
+        delete pInst;
+        pInst = nullptr;
+        qDebug()<<"RTCP 启动失败，请尝试修改RTCP协议端口号 "
+                <<"端口号="<<port<<" 监听ip="<<ipAddr;
+        return false;
     }
 }
 RTCP *RTCP::getInstance()
 {
-    if(pInst == nullptr){
-        pInst = new RTCP;
-    }
     return pInst;
 }
 void RTCP::newConn(){

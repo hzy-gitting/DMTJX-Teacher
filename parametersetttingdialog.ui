@@ -16,8 +16,8 @@
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>160</y>
+     <x>110</x>
+     <y>40</y>
      <width>591</width>
      <height>321</height>
     </rect>
@@ -35,6 +35,32 @@
      </rect>
     </property>
    </widget>
+  </widget>
+  <widget class="QPushButton" name="saveSettingBtn">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>470</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>保存</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="closeBtn">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>470</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>关闭</string>
+   </property>
   </widget>
  </widget>
  <resources/>

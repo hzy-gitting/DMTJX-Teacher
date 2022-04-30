@@ -15,8 +15,8 @@ private:
 
    QList<NetStudent*> stuList;
 private:
-   RTCP();
-   void init();
+   RTCP(QHostAddress ipAddr,quint16 port);
+   void init(QHostAddress ipAddr,quint16 port);
    QTcpServer *rtcpSrv;
 
 public:
@@ -26,7 +26,7 @@ public:
     bool sendFileRcvCommand(int stuId,QList<QString> fileList,QList<qint64> fileSizeList);
 
     NetStudent *findStudentById(int stuId);
-    static void start();
+    static bool start(QHostAddress ipAddr,quint16 port);
     bool sendFileData(int sId, QByteArray data);
 private slots:
     void newConn();
