@@ -22,6 +22,7 @@ SOURCES += \
     netstudent.cpp \
     network/networkcommunicationsystem.cpp \
     networkutils.cpp \
+    parametersetttingdialog.cpp \
     rgb2yuv.cpp \
     rtcp.cpp \
     sendfiledialog.cpp \
@@ -46,6 +47,7 @@ HEADERS += \
     netstudent.h \
     network/networkcommunicationsystem.h \
     networkutils.h \
+    parametersetttingdialog.h \
     rgb2yuv.h \
     rtcp.h \
     sendfiledialog.h \
@@ -54,6 +56,7 @@ HEADERS += \
 
 FORMS += \
     messageform.ui \
+    parametersetttingdialog.ui \
     sendfiledialog.ui \
     teachersndmsgwindow.ui \
     widget.ui

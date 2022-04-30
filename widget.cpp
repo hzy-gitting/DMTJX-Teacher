@@ -29,6 +29,8 @@
 #include<QMenuBar>
 #include<QMenu>
 #include<QAction>
+#include<QIcon>
+#include"parametersetttingdialog.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -38,8 +40,9 @@ Widget::Widget(QWidget *parent)
     //初始化菜单
     QMenuBar *menuBar =  new QMenuBar(this);
     QMenu *functionMenu = menuBar->addMenu("功能菜单");
-    QMenu *setupMenu = menuBar->addMenu("设置");
-    QAction *infoAction = setupMenu->addAction("主机信息");
+    QAction *paramSetupAction = functionMenu->addAction("参数设置");
+    connect(paramSetupAction,&QAction::triggered,this,&Widget::setUpParam);
+    //QAction *infoAction = setupMenu->addAction("主机信息");
     //connect
 
 
@@ -50,11 +53,59 @@ Widget::Widget(QWidget *parent)
         QMessageBox::information(this,"tips","connect fail");
         qDebug()<<"connect fail";
     }
-    ui->tableWidget->setColumnCount(3);
-    ui->tableWidget->setRowCount(2);
-    ui->tableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("ip"));
-    ui->tableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("port"));
-    ui->tableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("MAC地址"));
+    ui->tableWidget->setColumnCount(4);
+    ui->tableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("学生ID"));
+    ui->tableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("IP"));
+    ui->tableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("端口号"));
+    ui->tableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("MAC地址"));
+
+    ui->listWidget->setGeometry(900,100,300,300);
+    ui->listWidget->setIconSize(QSize(100,150));
+    //ui->listWidget->setGridSize(QSize(100,100));
+    ui->listWidget->setMovement(QListView::Snap);
+    ui->listWidget->setResizeMode(QListView::Adjust);
+    ui->listWidget->setSpacing(20);
+    QListWidgetItem *imageItem = new QListWidgetItem;
+    imageItem->setIcon(QIcon("E:/g.jpg"));
+    imageItem->setText("gg1");
+    imageItem->setToolTip("ip:1.1.3.4");
+    ui->listWidget->addItem(imageItem);
+    imageItem = new QListWidgetItem;
+    imageItem->setIcon(QIcon("E:/g.jpg"));
+    imageItem->setText("gg2");
+    ui->listWidget->addItem(imageItem);
+    imageItem = new QListWidgetItem;
+    imageItem->setIcon(QIcon("E:/g.jpg"));
+    imageItem->setText("gg3");
+    ui->listWidget->addItem(imageItem);
+    imageItem = new QListWidgetItem;
+    imageItem->setIcon(QIcon("E:/g.jpg"));
+    imageItem->setText("gg4");
+    ui->listWidget->addItem(imageItem);
+    imageItem = new QListWidgetItem;
+    imageItem->setIcon(QIcon("E:/g.jpg"));
+    imageItem->setText("gg5");
+    ui->listWidget->addItem(imageItem);
+
+    imageItem = new QListWidgetItem;
+    imageItem->setIcon(QIcon("E:/g.jpg"));
+    imageItem->setText("gg6");
+    ui->listWidget->addItem(imageItem);
+
+    imageItem = new QListWidgetItem;
+    imageItem->setIcon(QIcon("E:/g.jpg"));
+    imageItem->setText("gg7");
+    ui->listWidget->addItem(imageItem);
+
+    imageItem = new QListWidgetItem;
+    imageItem->setIcon(QIcon("E:/g.jpg"));
+    imageItem->setText("gg8");
+    ui->listWidget->addItem(imageItem);
+
+    imageItem = new QListWidgetItem;
+    imageItem->setIcon(QIcon("E:/g.jpg"));
+    imageItem->setText("gg9");
+    ui->listWidget->addItem(imageItem);
 
     us=new QUdpSocket();
     us->connectToHost(QHostAddress::LocalHost,8890);
@@ -134,7 +185,21 @@ Widget::~Widget()
 void Widget::studentTableAddItem(int sId,QHostAddress ip,qint32 port,char macAddr[]){
     qDebug()<<"新学生连接到RTCP id="<<sId<<" ip="<<ip<<" port="
         <<port<<" MAC地址 "<<NetworkUtils::macToString(macAddr);
+    QTableWidget *tab = ui->tableWidget;
+    int rowIndex = tab->rowCount();
+    tab->setRowCount(rowIndex + 1); //增加一行
+    tab->setItem(rowIndex,0,new QTableWidgetItem(QString::number(sId)));    //学生id
+    tab->setItem(rowIndex,1,new QTableWidgetItem(ip.toString()));    //学生ip
+    tab->setItem(rowIndex,2,new QTableWidgetItem(QString::number(port)));    //学生端口
+    tab->setItem(rowIndex,3,new QTableWidgetItem(NetworkUtils::macToString(macAddr)));    //学生mac地址
 }
+//参数设置
+void Widget::setUpParam(){
+    qDebug()<<"进行参数设置";
+    ParameterSetttingDialog dlg;
+    dlg.exec();
+}
+
 void Widget::written(qint64 bytesWritten){
 
 }
@@ -192,9 +257,6 @@ void Widget::uservRDRD(){
             data[n]='\0';
             if(strcmp(data,"detectReply") == 0){
                 qDebug()<<"detect student ip:"<<addr<<"port:"<<port;
-                ui->tableWidget->setItem(0,0,new QTableWidgetItem(addr.toString()));
-                char buf[100];
-                ui->tableWidget->setItem(0,1,new QTableWidgetItem(itoa(port,buf,10)));
             }
         }
     }

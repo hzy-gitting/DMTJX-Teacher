@@ -54,6 +54,7 @@ private slots:
     void on_remoteWakeBtn_clicked();
 
     void studentTableAddItem(int sId, QHostAddress ip, qint32 port, char macAddr[]);
+    void setUpParam();
 private:
     Ui::Widget *ui;
     QUdpSocket *us;

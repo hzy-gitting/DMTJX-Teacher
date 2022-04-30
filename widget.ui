@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>1134</width>
     <height>600</height>
    </rect>
   </property>
@@ -220,9 +220,9 @@
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>30</x>
      <y>60</y>
-     <width>361</width>
+     <width>441</width>
      <height>231</height>
     </rect>
    </property>
@@ -251,6 +251,25 @@
    </property>
    <property name="text">
     <string>远程开机</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="listWidget">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>60</y>
+     <width>301</width>
+     <height>281</height>
+    </rect>
+   </property>
+   <property name="defaultDropAction">
+    <enum>Qt::MoveAction</enum>
+   </property>
+   <property name="selectionMode">
+    <enum>QAbstractItemView::ExtendedSelection</enum>
+   </property>
+   <property name="viewMode">
+    <enum>QListView::IconMode</enum>
    </property>
   </widget>
  </widget>
