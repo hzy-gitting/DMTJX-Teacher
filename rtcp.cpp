@@ -115,6 +115,21 @@ bool RTCP::sendFileData(int sId,QByteArray data){
     return true;
 }
 
+//发送网络消息
+bool RTCP::sendMessage(int sId,QByteArray msg){
+    NetStudent *stu = findStudentById(sId);
+    if(stu == nullptr){
+        return false;
+    }
+    QTcpSocket *s = stu->getSocket();
+
+    QDataStream out(s);
+    out.setVersion(QDataStream::Qt_5_1);
+    out << QString("msg");//命令字段
+    out << msg;
+    out.device()->waitForBytesWritten(3000);
+    return true;
+}
 NetStudent *RTCP::findStudentById(int stuId)
 {
     for(int i=0;i<stuList.size();i++){

@@ -19,26 +19,9 @@ public:
     ~Widget();
 
     void stuDetect();
-public slots:
-    void tcpConnected();
-    void tcpReadyRead();
-    void tcpError();
-    void written(qint64 bytesWritten);
+
 private slots:
-    void on_pushButton_clicked();
-
-    void on_bindButton_clicked();
-
-    void on_connectButton_clicked();
-
     void on_tcpSendBtn_clicked();
-
-    void on_chooseFileBtn_clicked();
-
-    void on_tcpSendFileBtn_clicked();
-
-    void dataSent(qint64 bytesSent);
-    void on_btnSaveScreen_clicked();
 
     void on_pushButton_2_clicked();
 
@@ -57,14 +40,9 @@ private slots:
     void setUpParam();
 private:
     Ui::Widget *ui;
-    QUdpSocket *us;
     QUdpSocket *userv;
-    QTcpSocket *ts;
-    NetworkCommunicationSystem nsys;
-    QScreen *screen;
 public:
     QTcpSocket *controlSocket;
     void paintEvent(QPaintEvent *event) override;
-    void findMACByIP(QString ip);
 };
 #endif // WIDGET_H

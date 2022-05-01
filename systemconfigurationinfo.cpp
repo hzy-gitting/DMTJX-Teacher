@@ -54,7 +54,6 @@ bool SystemInfo::initialize()
     //设置默认配置
     for(QMap<QString,QString>::key_iterator it = defaultSettings->keyBegin();
         it!=defaultSettings->keyEnd();it++){
-        qDebug()<<*it;
         if(!settings->contains(*it)){
             settings->setValue(*it,defaultSettings->value(*it));
         }

@@ -18,7 +18,6 @@ SOURCES += \
     ffmpegEncoder.cpp \
     filereceiver.cpp \
     main.cpp \
-    messageform.cpp \
     netstudent.cpp \
     network/networkcommunicationsystem.cpp \
     networkutils.cpp \
@@ -44,7 +43,6 @@ HEADERS += \
     ffmpeg.h \
     ffmpegEncoder.h \
     filereceiver.h \
-    messageform.h \
     netstudent.h \
     network/networkcommunicationsystem.h \
     networkutils.h \
@@ -57,7 +55,6 @@ HEADERS += \
     widget.h
 
 FORMS += \
-    messageform.ui \
     parametersetttingdialog.ui \
     sendfiledialog.ui \
     teachersndmsgwindow.ui \

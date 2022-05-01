@@ -28,6 +28,7 @@ public:
     NetStudent *findStudentById(int stuId);
     static bool start(QHostAddress ipAddr,quint16 port);
     bool sendFileData(int sId, QByteArray data);
+    bool sendMessage(int sId, QByteArray msg);
 private slots:
     void newConn();
 signals:

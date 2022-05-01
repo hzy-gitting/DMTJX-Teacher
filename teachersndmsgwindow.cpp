@@ -1,6 +1,8 @@
 #include "teachersndmsgwindow.h"
 #include "ui_teachersndmsgwindow.h"
 #include"widget.h"
+#include"rtcp.h"
+
 TeacherSndMsgWindow::TeacherSndMsgWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::TeacherSndMsgWindow)
@@ -16,9 +18,9 @@ TeacherSndMsgWindow::~TeacherSndMsgWindow()
 void TeacherSndMsgWindow::on_sendMsgBtn_clicked()
 {
 
+    RTCP *rtcp = RTCP::getInstance();
+
     QString msg = ui->msgEdit->toPlainText();
-    Widget *pa = (Widget*)this->parent();
-    msg = "msg" + msg;
-    pa->controlSocket->write(msg.toUtf8());
+    rtcp->sendMessage(1,msg.toUtf8());
 }
 

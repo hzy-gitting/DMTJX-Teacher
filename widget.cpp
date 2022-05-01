@@ -31,6 +31,7 @@
 #include<QAction>
 #include<QIcon>
 #include"parametersetttingdialog.h"
+#include "systemconfigurationinfo.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -107,68 +108,16 @@ Widget::Widget(QWidget *parent)
     imageItem->setText("gg9");
     ui->listWidget->addItem(imageItem);
 
-    us=new QUdpSocket();
-    us->connectToHost(QHostAddress::LocalHost,8890);
-    connect(us,&QUdpSocket::bytesWritten,this,&Widget::written);
-
     //教师端一定要绑定到连接教室局域网的网络接口，不然发送广播包时系统可能使用其他的接口，这样就不对了
     //学生的ip在回应包头就可以得到
     //查学生的mac地址，用到win32 API 获取arp表项 4-15
     userv=new QUdpSocket();
-    userv->bind(QHostAddress("192.168.31.222"),8891);
+    QHostAddress ip1 = SystemInfo::getSystemInfo()->getIpAddr();
+    userv->bind(ip1,8891);
 
     connect(userv,&QUdpSocket::readyRead,this,&Widget::uservRDRD);
 
 
-    MIB_IPNETTABLE ipNetTab;
-    ULONG tabSize = sizeof(ipNetTab);
-    ULONG ret = GetIpNetTable(&ipNetTab,&tabSize,TRUE);
-    PMIB_IPNETTABLE pINTab;
-    if(ret == NO_ERROR){
-        qDebug()<<"no error";
-    }else if(ret == ERROR_NO_DATA){
-        qDebug()<<"ERROR_NO_DATA";
-    }else if(ret == ERROR_INSUFFICIENT_BUFFER){
-        qDebug()<<"ERROR_INSUFFICIENT_BUFFER";
-        pINTab = (PMIB_IPNETTABLE )malloc(tabSize);
-        ret = GetIpNetTable(pINTab,&tabSize,TRUE);
-        if((ret != NO_ERROR) && (ret != ERROR_NO_DATA)){
-            qDebug()<<"fail 2";
-        }
-    }else if(ret == ERROR_INVALID_PARAMETER){
-        qDebug()<<"ERROR_INVALID_PARAMETER";
-    }else if(ret == ERROR_NOT_SUPPORTED){
-        qDebug()<<"ERROR_NOT_SUPPORTED";
-    }else{
-        qDebug()<<"ip fail";
-    }
-
-
-    //输出IPNETTTABLE
-    int inum = pINTab->dwNumEntries;
-    QHostAddress ip;
-    for(int i=0;i<inum;i++){
-        struct in_addr addr;
-        addr.S_un.S_addr = pINTab->table[i].dwAddr;
-        ip.setAddress(inet_ntoa(addr));
-        qDebug()<<"ip:"<< ip;
-        for(int j=0;j<pINTab->table[i].dwPhysAddrLen;j++){
-            printf("%02x",pINTab->table[i].bPhysAddr[j]);
-            if(j < pINTab->table[i].dwPhysAddrLen - 1){
-                printf("-");
-            }
-        }
-        printf("\n");
-    }
-
-
-
-    ts=new QTcpSocket();
-    connect(ts,&QTcpSocket::connected,this,&Widget::tcpConnected);
-    connect(ts,&QTcpSocket::readyRead,this,&Widget::tcpReadyRead);
-    connect(ts,&QTcpSocket::errorOccurred,this,&Widget::tcpError);
-
-    connect(&nsys,&NetworkCommunicationSystem::dataSent,this,&Widget::dataSent);
 
     controlSocket = new QTcpSocket();
     controlSocket->connectToHost(QHostAddress::LocalHost,8888);//连接到学生
@@ -200,51 +149,7 @@ void Widget::setUpParam(){
     dlg.exec();
 }
 
-void Widget::written(qint64 bytesWritten){
-
-}
-void Widget::findMACByIP(QString ip){
-    MIB_IPNETTABLE ipNetTab;
-    ULONG tabSize = sizeof(ipNetTab);
-    ULONG ret = GetIpNetTable(&ipNetTab,&tabSize,TRUE);
-    PMIB_IPNETTABLE pINTab;
-    if(ret == NO_ERROR){
-        qDebug()<<"no error";
-    }else if(ret == ERROR_NO_DATA){
-        qDebug()<<"ERROR_NO_DATA";
-    }else if(ret == ERROR_INSUFFICIENT_BUFFER){
-        qDebug()<<"ERROR_INSUFFICIENT_BUFFER";
-        pINTab = (PMIB_IPNETTABLE )malloc(tabSize);
-        ret = GetIpNetTable(pINTab,&tabSize,TRUE);
-        if((ret != NO_ERROR) && (ret != ERROR_NO_DATA)){
-            qDebug()<<"fail 2";
-        }
-    }else if(ret == ERROR_INVALID_PARAMETER){
-        qDebug()<<"ERROR_INVALID_PARAMETER";
-    }else if(ret == ERROR_NOT_SUPPORTED){
-        qDebug()<<"ERROR_NOT_SUPPORTED";
-    }else{
-        qDebug()<<"ip fail";
-    }
-
-
-    //输出IPNETTTABLE
-    int inum = pINTab->dwNumEntries;
-    QHostAddress addr;
-    for(int i=0;i<inum;i++){
-        addr.setAddress(pINTab->table[i].dwAddr);
-        struct in_addr addr;
-        addr.S_un.S_addr = pINTab->table[i].dwAddr;
-        printf("ip:%s  ",inet_ntoa(addr));
-        for(int j=0;j<pINTab->table[i].dwPhysAddrLen;j++){
-            printf("%02x",pINTab->table[i].bPhysAddr[j]);
-            if(j < pINTab->table[i].dwPhysAddrLen - 1){
-                printf("-");
-            }
-        }
-        printf("\n");
-    }
-}
+//探测端口接收到数据
 void Widget::uservRDRD(){
     int len = 50000;
     char *data = new char[len];
@@ -255,6 +160,7 @@ void Widget::uservRDRD(){
     if(n){
         if(userv->readDatagram(data,n,&addr,&port)){
             data[n]='\0';
+            qDebug()<<data;
             if(strcmp(data,"detectReply") == 0){
                 qDebug()<<"detect student ip:"<<addr<<"port:"<<port;
             }
@@ -263,33 +169,7 @@ void Widget::uservRDRD(){
     delete[] data;
 }
 
-void Widget::on_pushButton_clicked()
-{
-    QString s = ui->lineEdit->text();
-    QByteArray ba=s.toLocal8Bit();
-    us->connectToHost(QHostAddress(ui->ipEdit->text()),ui->portEdit->text().toInt());
-    if(!us->open(QIODevice::ReadOnly)){
-        qDebug()<<"soc open fail22";
-    }
-    if(-1 == us->write(ba)){
-        qDebug()<<"udp write fail"<<us->error()<<us->errorString();
-    }
-    /*if(-1 == us->writeDatagram(ba,ba.length(),QHostAddress(ui->ipEdit->text()),ui->portEdit->text().toInt())){
-        qDebug()<<"udp send fail"<<us->errorString();
-    }*/
-}
 
-
-void Widget::on_bindButton_clicked()
-{
-    us->bind(QHostAddress(ui->ipEdit->text()),ui->portEdit->text().toInt());
-}
-
-//连接
-void Widget::on_connectButton_clicked()
-{
-    ts->connectToHost(ui->ipEdit->text(),ui->portEdit->text().toInt());
-}
 
 //tcp发送
 void Widget::on_tcpSendBtn_clicked()
@@ -297,72 +177,8 @@ void Widget::on_tcpSendBtn_clicked()
     SendFileDialog sfd;
     sfd.exec();
 }
-//连接成功
-void Widget::tcpConnected(){
-    qDebug()<<"连接成功 "<< ts->peerAddress()<<"port="<<ts->peerPort()<<ts->peerName();
-}
-//接收消息
-void Widget::tcpReadyRead(){
-}
 
-//tcp发生错误
-void Widget::tcpError(){
-    qDebug()<<ts->error();
-}
 
-//选择文件
-void Widget::on_chooseFileBtn_clicked()
-{
-    QString fileName = QFileDialog::getOpenFileName(this,"选择文件");
-    ui->filePathEdit->setText(fileName);
-    ui->filePathEdit->setProperty("sFileName",fileName);
-}
-
-//tcp发送文件
-void Widget::on_tcpSendFileBtn_clicked()
-{
-    QString fileName = ui->filePathEdit->text();
-    QFile f(fileName);
-    qsizetype index = fileName.lastIndexOf('/');
-
-    if(!f.open(QIODevice::ReadOnly)){
-        qDebug()<<"打开文件失败";
-        return;
-    }
-    //发送文件大小
-    qint64 fileSize=f.size();
-    QByteArray bs;
-    QDataStream ds(&bs,QIODevice::WriteOnly);
-    ds.setVersion(QDataStream::Qt_5_1);
-    ds<<fileSize;
-    ds<<fileName.sliced(index+1);//文件名也发送过去，方便学生端命名
-    qDebug()<<"文件名:"<<fileName.sliced(index+1);
-    if(!nsys.tcpSendData(bs.data(),bs.size(),QHostAddress::LocalHost,8887)){
-        qDebug()<<"发送数据失败";
-        return;
-    }
-
-    qint64 bytesRead = 0,bytesLeft = fileSize;
-    qint64 const maxBytesPerRead=1024*1024;
-    QByteArray b;
-    //对于大文件，超过一个G的，读取可能很慢，要分段边读取边发送，提高效率
-    while(bytesLeft > 0){
-        b = f.read(maxBytesPerRead);
-        bytesRead = b.size();
-        bytesLeft -= bytesRead;
-        if(!nsys.tcpSendData(b.data(),b.size(),QHostAddress::LocalHost,8887)){
-            qDebug()<<"发送数据失败";
-            return;
-        }
-    }
-
-    f.close();
-    QMessageBox::information(this,"提示","文件传输完毕");
-}
-
-void Widget::dataSent(qint64 bytesSent){
-    qDebug()<<"sent "<<bytesSent<<" bytes";
-}
 //绘图事件
 void Widget::paintEvent(QPaintEvent *event)
 {
@@ -380,21 +196,6 @@ void Widget::paintEvent(QPaintEvent *event)
     //qDebug()<<img.width()<<" "<<img.height()<< " "<<devicePixelRatio()<<" "<<painter.renderHints();
     painter.drawLine(0,0,100,100);*/
 
-}
-//保存截屏
-void Widget::on_btnSaveScreen_clicked()
-{
-    qDebug()<<"s";
-
-    QPixmap sc = screen->grabWindow(0);//全屏50ms 根据截屏大小而变化，截屏范围越大越耗时  2
-
-    QBuffer buf;
-    buf.open(QIODevice::WriteOnly);qDebug()<<QTime::currentTime();
-    sc.save(&buf,"jpg",0);    qDebug()<<QTime::currentTime();      //压缩100ms 跟图像压缩质量、大小有关  3
-    us->write(buf.buffer());
-    us->waitForBytesWritten();
-    buf.close();
-    qDebug()<<"e";
 }
 
 
@@ -565,6 +366,8 @@ void Widget::on_pushButton_2_clicked()
         ffmpeg264.encode(frame);	//h.264视频编码，保存到文件       瓶颈2：网络速率 50-500-1000ms  qt的网络封装导致速度慢？
 
         qDebug()<<"teac enc end "<<QTime::currentTime();
+
+        QApplication::processEvents();
 
         // ffmpegmpeg1.encode(frame);
         // libx264.encode(frame);

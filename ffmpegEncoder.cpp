@@ -4,6 +4,7 @@
 #define min(a,b) (a) < (b) ? (a) : (b)
 #include<QDebug>
 #include<QTime>
+#include"systemconfigurationinfo.h"
 
 bool IEncoder::encode(AVFrame * frame)
 {
@@ -30,10 +31,11 @@ bool IEncoder::encode(AVFrame * frame)
         qDebug()<<"writeDatagram "<<QTime::currentTime();
         while(pktsizeLeft > 0){
             send_size = min(UDP_MAX_DG_LEN,pktsizeLeft);
-            size_sent = us->writeDatagram((const char*)dp,send_size,QHostAddress::LocalHost,8901);
+            size_sent = us->writeDatagram((const char*)dp,send_size,QHostAddress::Broadcast,8901);
             if(-1 == size_sent){
                 printf("send vdpkt err");
-                exit(0);
+                qDebug()<<us->errorString()<<us->error();
+                //exit(0);
             }
             if(size_sent != send_size){
                 printf("!=!=size_sent=%d send_size=%d",size_sent,send_size);
@@ -105,6 +107,11 @@ void x264Encoder::init()
 		return;
 	}
     us = new QUdpSocket();
+    QHostAddress ip = SystemInfo::getSystemInfo()->getIpAddr();
+    if(!us->bind(ip,10001)){
+        qDebug()<<"us bind fial"<<us->errorString();
+        exit(0);
+    }
 }
 
 void x264Encoder::init_header()

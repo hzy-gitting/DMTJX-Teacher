@@ -1,6 +1,7 @@
 #include "parametersetttingdialog.h"
 #include "ui_parametersetttingdialog.h"
 #include<QNetworkInterface>
+#include"systemconfigurationinfo.h"
 
 ParameterSetttingDialog::ParameterSetttingDialog(QWidget *parent) :
     QDialog(parent),
@@ -55,14 +56,18 @@ void ParameterSetttingDialog::showNetworkAdapterList()
 //更改网络适配器选择
 void ParameterSetttingDialog::on_networkAdapterList_itemSelectionChanged()
 {
-    qDebug()<<__FUNCTION__;
-    qDebug() << ui->networkAdapterList->currentItem()->data(Qt::UserRole);
+    this->macAddr = ui->networkAdapterList->currentItem()->data(Qt::UserRole).toString();
+    qDebug()<<macAddr;
 }
 
 //保存最新参数设置
 void ParameterSetttingDialog::on_saveSettingBtn_clicked()
 {
+    QSettings *setting = SystemInfo::getSettings();
+    //连接教室局域网的网卡硬件地址
+    setting->setValue("macAddr",this->macAddr);
 
+    close();
 }
 
 //关闭窗口
