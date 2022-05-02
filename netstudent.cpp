@@ -1,5 +1,6 @@
 #include "netstudent.h"
 #include"filereceiver.h"
+#include<QHostAddress>
 
 int NetStudent::getStuId() const
 {
@@ -45,10 +46,11 @@ void NetStudent::setComputerName(const QString &newComputerName)
     computerName = newComputerName;
 }
 
-NetStudent::NetStudent(QObject *parent):QObject(parent)
+NetStudent::NetStudent(QObject *parent) : QObject(parent)
 {
     stuId = -2;
     socket = nullptr;
+    isOnLine = true;
 }
 
 //处理来自学生端的数据
@@ -86,5 +88,17 @@ void NetStudent::slotReadyRead(){
     }
     if(socket->bytesAvailable()){
         slotReadyRead();
+    }
+}
+
+//处理来自学生端套接字错误处理
+void NetStudent::slotErrorOccurred(QAbstractSocket::SocketError socketError){
+    qDebug()<<__FUNCTION__<<" "<<socketError;
+    qDebug()<<socket->errorString();
+    if(socketError == QAbstractSocket::RemoteHostClosedError){
+        isOnLine=false;
+        qDebug()<<"学生 id="<<stuId<<"ip="<<socket->peerAddress().toString()
+               <<" 连接已断开";
+        emit sigDisconnected(stuId);
     }
 }

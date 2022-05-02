@@ -1,13 +1,12 @@
 #ifndef NETSTUDENT_H
 #define NETSTUDENT_H
-
 #include<QObject>
 #include<QTcpSocket>
 #include"filereceiver.h"
 
-class NetStudent : public QObject
+class NetStudent:public QObject
 {
-    //Q_OBJECT
+    Q_OBJECT
 
 private:
     int stuId;      //学生id
@@ -15,6 +14,7 @@ private:
     QTcpSocket *socket;     //教师端与学生关联的套接字
     FileReceiver *frcver;   //文件接收
     char macAddr[6];        //学生端mac地址
+    bool isOnLine;          //学生是否在线
 
 public:
     explicit NetStudent(QObject *parent = nullptr);
@@ -32,6 +32,9 @@ public:
 
 public slots:
     void slotReadyRead();
+    void slotErrorOccurred(QAbstractSocket::SocketError socketError);
+signals:
+    void sigDisconnected(int sId);
 };
 
 #endif // NETSTUDENT_H

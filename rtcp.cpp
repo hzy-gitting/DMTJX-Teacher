@@ -55,6 +55,8 @@ void RTCP::newConn(){
         sId++;
         stu->setSocket(s);  //关联socket
         connect(s,&QTcpSocket::readyRead,stu,&NetStudent::slotReadyRead);
+        connect(s,&QTcpSocket::errorOccurred,stu,&NetStudent::slotErrorOccurred);
+        connect(stu,&NetStudent::sigDisconnected,this,&RTCP::sigStuDisconnected);
         /*SOCKET nativeSkt = s->socketDescriptor();
         char chOpt = 1;
         int ret = setsockopt(nativeSkt,IPPROTO_TCP,TCP_NODELAY,&chOpt,sizeof(char));
@@ -84,6 +86,9 @@ bool RTCP::sendFileRcvCommand(int sId,QList<QString> fileList,QList<qint64> file
     QByteArray data;
     QDataStream dataOut(&data,QIODevice::ReadWrite);
     QTcpSocket *s = stu->getSocket();
+    if(s->state() != QAbstractSocket::ConnectedState){
+        return false;
+    }
     QDataStream out(s);
     out.setVersion(QDataStream::Qt_5_1);
     out << QString("fileRcv");//命令字段
@@ -95,23 +100,57 @@ bool RTCP::sendFileRcvCommand(int sId,QList<QString> fileList,QList<qint64> file
     out << data;
     return true;
 }
+
+
+bool RTCP::sendFileRcvCommand(QList<QString> fileList, QList<qint64> fileSizeList)
+{
+    bool b = true;
+    for(int i=0;i<stuList.size();i++){
+        if(!sendFileRcvCommand(stuList.at(i)->getStuId(),fileList,fileSizeList)){
+            b = false;
+        }
+    }
+
+    return b;
+}
+
+bool RTCP::sendFileData(QByteArray data)
+{
+    bool b = true;
+    for(int i=0;i<stuList.size();i++){
+        if(!sendFileData(stuList.at(i)->getStuId(),data)){
+            b = false;
+        }
+    }
+    return b;
+}
+
+bool RTCP::sendMessage(QByteArray msg)
+{
+    bool b = true;
+    for(int i=0;i<stuList.size();i++){
+        if(!sendMessage(stuList.at(i)->getStuId(),msg)){
+            b = false;
+        }
+    }
+    return b;
+}
+
+
 bool RTCP::sendFileData(int sId,QByteArray data){
     NetStudent *stu = findStudentById(sId);
     if(stu == nullptr){
         return false;
     }
     QTcpSocket *s = stu->getSocket();
-
+    if(s->state() != QAbstractSocket::ConnectedState){
+        return false;
+    }
     QDataStream out(s);
     out.setVersion(QDataStream::Qt_5_1);
-    //out.startTransaction();
     out << QString("fileData");//命令字段
     out << data;
     out.device()->waitForBytesWritten(3000);
-    /*if(!out.commitTransaction()){
-        qDebug()<<"commitTransaction fail";
-        return false;
-    }*/
     return true;
 }
 
@@ -122,7 +161,9 @@ bool RTCP::sendMessage(int sId,QByteArray msg){
         return false;
     }
     QTcpSocket *s = stu->getSocket();
-
+    if(s->state() != QAbstractSocket::ConnectedState){
+        return false;
+    }
     QDataStream out(s);
     out.setVersion(QDataStream::Qt_5_1);
     out << QString("msg");//命令字段
@@ -130,6 +171,37 @@ bool RTCP::sendMessage(int sId,QByteArray msg){
     out.device()->waitForBytesWritten(3000);
     return true;
 }
+
+//发送关机命令
+bool RTCP::sendShutdownCommand(int sId){
+    NetStudent *stu = findStudentById(sId);
+    if(stu == nullptr){
+        return false;
+    }
+    QTcpSocket *s = stu->getSocket();
+    if(s->state() != QAbstractSocket::ConnectedState){
+        return false;
+    }
+    QDataStream out(s);
+    out.setVersion(QDataStream::Qt_5_1);
+    out << QString("shutdown");//命令字段
+    QByteArray payload;
+    out<<payload;   //空数据体
+    out.device()->waitForBytesWritten(3000);
+    return true;
+}
+//发送关机命令给所有学生
+bool RTCP::sendShutdownCommand(){
+    bool b = true;
+    for(int i=0;i<stuList.size();i++){
+        if(!sendShutdownCommand(stuList.at(i)->getStuId())){
+            b = false;
+        }
+    }
+    return b;
+}
+
+
 NetStudent *RTCP::findStudentById(int stuId)
 {
     for(int i=0;i<stuList.size();i++){

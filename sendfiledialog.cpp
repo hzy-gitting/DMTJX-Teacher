@@ -52,7 +52,7 @@ void SendFileDialog::on_sendBtn_clicked()
 {
     //禁用该按钮
     ui->sendBtn->setDisabled(true);
-    nStudent = 1;
+
     //创建文件传输服务器
     /*fsrv = new QTcpServer;
     if(!fsrv->listen(QHostAddress::Any,8979)){
@@ -62,8 +62,8 @@ void SendFileDialog::on_sendBtn_clicked()
     //通知学端连接教师，准备接收文件，告知文件名称、大小、服务端口
     //调用RTCP
     RTCP *rtcp = RTCP::getInstance();
-    if(!rtcp->sendFileRcvCommand(1,fileList,fileSizeList)){
-        qDebug()<<"sendFileRcvCommand faIl";
+    if(!rtcp->sendFileRcvCommand(fileList,fileSizeList)){
+        qDebug()<<"部分文件传输命令发送失败";
         return;
     }
 
@@ -76,6 +76,7 @@ void SendFileDialog::on_sendBtn_clicked()
         f.setFileName(fileList.at(i));
         if(!f.open(QIODevice::ReadOnly)){
             qDebug()<<"fopen fail";
+            QMessageBox::information(this,"提示","打开文件"+f.fileName()+"失败，请重试");
             delete[]data;
             return;
         }
@@ -83,19 +84,25 @@ void SendFileDialog::on_sendBtn_clicked()
             qint64 n = f.read(data,blockSize);
             if(-1 == n){
                 qDebug()<<"read file fail";
+                QMessageBox::information(this,"提示","读取文件"+f.fileName()+"失败，请重试");
+                delete[]data;
+                return;
             }
             qDebug()<<"read file n="<<n;
             fdata.setRawData(data,n);
-            if(!rtcp->sendFileData(1,fdata)){
-                qDebug()<<"sendFileData faIl";
+            if(!rtcp->sendFileData(fdata)){
+                qDebug()<<"部分学生发送失败";
                 return;
             }
             QGuiApplication::processEvents();
         }
         f.close();
     }
-    delete[]data;
 
+    QMessageBox::information(this,"提示","发送完成");
+
+    delete[]data;
+    ui->sendBtn->setEnabled(true);
 }
 
 //新连接到来
@@ -133,5 +140,10 @@ void SendFileDialog::startSendFileData(){
             return;
         }
     }
-    QMessageBox::information(this,"提示","发送完成");
 }
+
+void SendFileDialog::on_closeBtn_clicked()
+{
+    close();
+}
+

@@ -21,6 +21,6 @@ void TeacherSndMsgWindow::on_sendMsgBtn_clicked()
     RTCP *rtcp = RTCP::getInstance();
 
     QString msg = ui->msgEdit->toPlainText();
-    rtcp->sendMessage(1,msg.toUtf8());
+    rtcp->sendMessage(msg.toUtf8());
 }
 

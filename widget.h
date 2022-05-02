@@ -38,11 +38,15 @@ private slots:
 
     void studentTableAddItem(int sId, QHostAddress ip, qint32 port, char macAddr[]);
     void setUpParam();
+    void slotStuDisconnected(int sId);
+    void on_studentListWidget_itemSelectionChanged();
+
 private:
     Ui::Widget *ui;
     QUdpSocket *userv;
+
+    QList<int> stuIDSelectedList;   //当前选中的学生id集合
 public:
-    QTcpSocket *controlSocket;
     void paintEvent(QPaintEvent *event) override;
 };
 #endif // WIDGET_H

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1134</width>
+    <width>1245</width>
     <height>600</height>
    </rect>
   </property>
@@ -18,16 +18,16 @@
     <rect>
      <x>250</x>
      <y>100</y>
-     <width>441</width>
-     <height>231</height>
+     <width>401</width>
+     <height>321</height>
     </rect>
    </property>
   </widget>
-  <widget class="QListWidget" name="listWidget">
+  <widget class="QListWidget" name="studentListWidget">
    <property name="geometry">
     <rect>
-     <x>770</x>
-     <y>140</y>
+     <x>680</x>
+     <y>130</y>
      <width>301</width>
      <height>281</height>
     </rect>

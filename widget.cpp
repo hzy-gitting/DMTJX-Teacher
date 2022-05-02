@@ -54,59 +54,34 @@ Widget::Widget(QWidget *parent)
         QMessageBox::information(this,"tips","connect fail");
         qDebug()<<"connect fail";
     }
+
+    connect(RTCP::getInstance(),&RTCP::sigStuDisconnected,
+                this,&Widget::slotStuDisconnected);
+
+
     ui->tableWidget->setColumnCount(4);
     ui->tableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("学生ID"));
     ui->tableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("IP"));
     ui->tableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("端口号"));
     ui->tableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("MAC地址"));
 
-    ui->listWidget->setGeometry(900,100,300,300);
-    ui->listWidget->setIconSize(QSize(100,150));
+    QListWidget *stuLstWidget = ui->studentListWidget;
+
+    stuLstWidget->setGeometry(900,100,300,300);
+    stuLstWidget->setIconSize(QSize(100,150));
     //ui->listWidget->setGridSize(QSize(100,100));
-    ui->listWidget->setMovement(QListView::Snap);
-    ui->listWidget->setResizeMode(QListView::Adjust);
-    ui->listWidget->setSpacing(20);
+    stuLstWidget->setMovement(QListView::Snap);
+    stuLstWidget->setResizeMode(QListView::Adjust);
+    stuLstWidget->setSpacing(20);
     QListWidgetItem *imageItem = new QListWidgetItem;
     imageItem->setIcon(QIcon("E:/g.jpg"));
     imageItem->setText("gg1");
     imageItem->setToolTip("ip:1.1.3.4");
-    ui->listWidget->addItem(imageItem);
+    stuLstWidget->addItem(imageItem);
     imageItem = new QListWidgetItem;
     imageItem->setIcon(QIcon("E:/g.jpg"));
     imageItem->setText("gg2");
-    ui->listWidget->addItem(imageItem);
-    imageItem = new QListWidgetItem;
-    imageItem->setIcon(QIcon("E:/g.jpg"));
-    imageItem->setText("gg3");
-    ui->listWidget->addItem(imageItem);
-    imageItem = new QListWidgetItem;
-    imageItem->setIcon(QIcon("E:/g.jpg"));
-    imageItem->setText("gg4");
-    ui->listWidget->addItem(imageItem);
-    imageItem = new QListWidgetItem;
-    imageItem->setIcon(QIcon("E:/g.jpg"));
-    imageItem->setText("gg5");
-    ui->listWidget->addItem(imageItem);
-
-    imageItem = new QListWidgetItem;
-    imageItem->setIcon(QIcon("E:/g.jpg"));
-    imageItem->setText("gg6");
-    ui->listWidget->addItem(imageItem);
-
-    imageItem = new QListWidgetItem;
-    imageItem->setIcon(QIcon("E:/g.jpg"));
-    imageItem->setText("gg7");
-    ui->listWidget->addItem(imageItem);
-
-    imageItem = new QListWidgetItem;
-    imageItem->setIcon(QIcon("E:/g.jpg"));
-    imageItem->setText("gg8");
-    ui->listWidget->addItem(imageItem);
-
-    imageItem = new QListWidgetItem;
-    imageItem->setIcon(QIcon("E:/g.jpg"));
-    imageItem->setText("gg9");
-    ui->listWidget->addItem(imageItem);
+    stuLstWidget->addItem(imageItem);
 
     //教师端一定要绑定到连接教室局域网的网络接口，不然发送广播包时系统可能使用其他的接口，这样就不对了
     //学生的ip在回应包头就可以得到
@@ -118,11 +93,6 @@ Widget::Widget(QWidget *parent)
     connect(userv,&QUdpSocket::readyRead,this,&Widget::uservRDRD);
 
 
-
-    controlSocket = new QTcpSocket();
-    controlSocket->connectToHost(QHostAddress::LocalHost,8888);//连接到学生
-
-
     //学生探测
     stuDetect();
 }
@@ -132,15 +102,38 @@ Widget::~Widget()
     delete ui;
 }
 void Widget::studentTableAddItem(int sId,QHostAddress ip,qint32 port,char macAddr[]){
+
+    QString sMac = NetworkUtils::macToString(macAddr);
     qDebug()<<"新学生连接到RTCP id="<<sId<<" ip="<<ip<<" port="
-        <<port<<" MAC地址 "<<NetworkUtils::macToString(macAddr);
+        <<port<<" MAC地址 "<<sMac;
     QTableWidget *tab = ui->tableWidget;
     int rowIndex = tab->rowCount();
     tab->setRowCount(rowIndex + 1); //增加一行
     tab->setItem(rowIndex,0,new QTableWidgetItem(QString::number(sId)));    //学生id
     tab->setItem(rowIndex,1,new QTableWidgetItem(ip.toString()));    //学生ip
     tab->setItem(rowIndex,2,new QTableWidgetItem(QString::number(port)));    //学生端口
-    tab->setItem(rowIndex,3,new QTableWidgetItem(NetworkUtils::macToString(macAddr)));    //学生mac地址
+    tab->setItem(rowIndex,3,new QTableWidgetItem(sMac));    //学生mac地址
+
+    QListWidget *stuLstWidget = ui->studentListWidget;
+    QListWidgetItem *newItem = new QListWidgetItem;
+    newItem->setIcon(QIcon("E:/g.jpg"));
+    newItem->setText(ip.toString());
+    newItem->setData(Qt::UserRole,sId);
+    QByteArray macBA(macAddr,6);
+    newItem->setData(Qt::UserRole+1,macBA);
+    QString toolTip = "ID:"+QString::number(sId)+
+            "\nIP地址："+ip.toString()+
+            "\n端口号："+QString::number(port)+
+            "\nMAC地址："+sMac;
+    newItem->setToolTip(toolTip);
+    stuLstWidget->addItem(newItem);
+
+}
+
+//学生掉线处理
+void Widget::slotStuDisconnected(int sId){
+    qDebug()<<"学生 id="<<sId<<" 掉线了。";
+
 }
 //参数设置
 void Widget::setUpParam(){
@@ -202,7 +195,17 @@ void Widget::paintEvent(QPaintEvent *event)
 //远程关机
 void Widget::on_pushButton_3_clicked()
 {
-    controlSocket->write("shutdown");
+    if(stuIDSelectedList.size() <= 0){
+        QMessageBox::information(this,"提示","请至少选中一个学生");
+        return;
+    }
+    for(int i = 0;i< stuIDSelectedList.size();i++){
+        RTCP *rtcp = RTCP::getInstance();
+        if(!rtcp->sendShutdownCommand(stuIDSelectedList.at(i))){
+            QMessageBox::information(this,"提示",
+                      "学生id="+QString::number(i)+"发送远程关机命令失败");
+        }
+    }
 }
 
 //网络发现：探测在线的学生客户端，返回在线的学生ip、mac地址
@@ -474,16 +477,46 @@ void Widget::on_remoteWakeBtn_clicked()
     有时数据包内还会紧接着4-6字节的密码信息。这个帧片段可以包含在任何协议中
     ，最常见的是包含在 UDP 中。*/
 
-     char macAddr[6];
-    if(!NetworkUtils::getMacAddrByIp(macAddr,QHostAddress("192.168.31.1"))){
-        qDebug()<<"getMacAddrByIp failed";
+    QListWidget *lw = ui->studentListWidget;
+    QList<QListWidgetItem*> selItems = lw->selectedItems();
+    QListWidgetItem *item;
+    if(selItems.size()<=0){
+        QMessageBox::information(this,"提示","请至少选择一个学生机来唤醒");
         return;
     }
-    qDebug()<<"macAddr="<<NetworkUtils::macToString(macAddr);
-    if(!NetworkUtils::sendMagicPacket(userv,macAddr)){
-        qDebug()<<"sendMagicPacket failed";
-        return;
+    char *macAddr;
+    for(int i=0;i<selItems.size();i++){
+        item=selItems.at(i);
+        macAddr = item->data(Qt::UserRole+1).toByteArray().data();
+        QString sMac = NetworkUtils::macToString(macAddr);
+        qDebug()<<"macAddr="<<sMac;
+        if(!NetworkUtils::sendMagicPacket(userv,macAddr)){
+            qDebug()<<"sendMagicPacket failed";
+            QMessageBox::information(this,"提示",
+                                     "发送"+sMac+"的魔法包失败");
+            return;
+        }
     }
+    QMessageBox::information(this,"提示","任务完毕");
 }
 
+
+
+void Widget::on_studentListWidget_itemSelectionChanged()
+{
+    qDebug()<<__FUNCTION__;
+    QListWidget *lw = ui->studentListWidget;
+    QList<QListWidgetItem*> selItems = lw->selectedItems();
+    QListWidgetItem *item;
+    stuIDSelectedList.clear();
+    qDebug()<<"当前选中"<<selItems.size()<<"个学生";
+    for(int i=0;i<selItems.size();i++){
+        item=selItems.at(i);
+        int id;
+        id = item->data(Qt::UserRole).toInt();
+        qDebug()<<item->data(Qt::UserRole+1);
+        qDebug()<<"sId="<<id;
+        stuIDSelectedList.append(id);
+    }
+}
 

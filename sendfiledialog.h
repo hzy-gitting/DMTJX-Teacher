@@ -21,6 +21,8 @@ private slots:
     void on_sendBtn_clicked();
 
     void newConn();
+    void on_closeBtn_clicked();
+
 private:
     Ui::SendFileDialog *ui;
 

@@ -9,7 +9,7 @@
 
 bool IEncoder::encode(AVFrame * frame)
 {
-    const int UDP_MAX_DG_LEN = 60000;
+    const int UDP_MAX_DG_LEN = 500;
     int send_size = 0;
     int size_sent = 0;
     int pktsizeLeft = 0;
@@ -35,7 +35,7 @@ bool IEncoder::encode(AVFrame * frame)
             size_sent = us->writeDatagram((const char*)dp,send_size,QHostAddress::Broadcast,8901);
             if(-1 == size_sent){
                 printf("send vdpkt err send_size=%d",send_size);
-                qDebug()<<us->errorString()<<us->error();
+                //qDebug()<<us->errorString()<<us->error();
                 // ‰≥ˆWinsock¥ÌŒÛ–≈œ¢
                 char* lpMsgBuf = NULL;
                 DWORD dw = WSAGetLastError();
