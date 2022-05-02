@@ -13,112 +13,21 @@
   <property name="windowTitle">
    <string>教师端</string>
   </property>
-  <widget class="QPushButton" name="tcpSendBtn">
-   <property name="geometry">
-    <rect>
-     <x>350</x>
-     <y>390</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>TCP发送</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_2">
-   <property name="geometry">
-    <rect>
-     <x>652</x>
-     <y>430</y>
-     <width>111</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>开始屏幕广播</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_3">
-   <property name="geometry">
-    <rect>
-     <x>680</x>
-     <y>500</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>远程关机</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_4">
-   <property name="geometry">
-    <rect>
-     <x>650</x>
-     <y>300</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>学生探测</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_5">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>390</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>网络对话</string>
-   </property>
-  </widget>
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>60</y>
+     <x>250</x>
+     <y>100</y>
      <width>441</width>
      <height>231</height>
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="openFileRcvDirBtn">
-   <property name="geometry">
-    <rect>
-     <x>602</x>
-     <y>550</y>
-     <width>171</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>查看提交的作业</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="remoteWakeBtn">
-   <property name="geometry">
-    <rect>
-     <x>560</x>
-     <y>500</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>远程开机</string>
-   </property>
-  </widget>
   <widget class="QListWidget" name="listWidget">
    <property name="geometry">
     <rect>
-     <x>800</x>
-     <y>60</y>
+     <x>770</x>
+     <y>140</y>
      <width>301</width>
      <height>281</height>
     </rect>
@@ -132,6 +41,67 @@
    <property name="viewMode">
     <enum>QListView::IconMode</enum>
    </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>140</y>
+     <width>141</width>
+     <height>391</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QPushButton" name="pushButton_4">
+      <property name="text">
+       <string>学生探测</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_5">
+      <property name="text">
+       <string>网络对话</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="tcpSendBtn">
+      <property name="text">
+       <string>发送文件</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="text">
+       <string>开始屏幕广播</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="openFileRcvDirBtn">
+      <property name="text">
+       <string>查看提交的作业</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="remoteWakeBtn">
+      <property name="text">
+       <string>远程开机</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_3">
+      <property name="text">
+       <string>远程关机</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

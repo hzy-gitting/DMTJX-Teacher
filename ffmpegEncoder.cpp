@@ -5,6 +5,7 @@
 #include<QDebug>
 #include<QTime>
 #include"systemconfigurationinfo.h"
+#include<WinSock2.h>
 
 bool IEncoder::encode(AVFrame * frame)
 {
@@ -33,8 +34,27 @@ bool IEncoder::encode(AVFrame * frame)
             send_size = min(UDP_MAX_DG_LEN,pktsizeLeft);
             size_sent = us->writeDatagram((const char*)dp,send_size,QHostAddress::Broadcast,8901);
             if(-1 == size_sent){
-                printf("send vdpkt err");
+                printf("send vdpkt err send_size=%d",send_size);
                 qDebug()<<us->errorString()<<us->error();
+                // ‰≥ˆWinsock¥ÌŒÛ–≈œ¢
+                char* lpMsgBuf = NULL;
+                DWORD dw = WSAGetLastError();
+                if(FormatMessage(
+                    FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                    FORMAT_MESSAGE_FROM_SYSTEM |
+                    FORMAT_MESSAGE_IGNORE_INSERTS,
+                    NULL,
+                    dw,
+                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                    (LPTSTR) &lpMsgBuf,
+                            0, NULL )){
+                    qDebug()<<"WSAGetLastError()="<<dw<<" msg="<<lpMsgBuf;
+                    LocalFree(lpMsgBuf);
+                }
+                else{
+                    qDebug()<<"FormatMessage fail";
+                }
+
                 //exit(0);
             }
             if(size_sent != send_size){
@@ -108,9 +128,9 @@ void x264Encoder::init()
 	}
     us = new QUdpSocket();
     QHostAddress ip = SystemInfo::getSystemInfo()->getIpAddr();
-    if(!us->bind(ip,10001)){
+    if(!us->bind(ip,0)){
         qDebug()<<"us bind fial"<<us->errorString();
-        exit(0);
+        //exit(0);
     }
 }
 
