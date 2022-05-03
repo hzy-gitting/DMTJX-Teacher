@@ -7,6 +7,7 @@
 #include<iterator>
 #include<QTcpSocket>
 #include<QMessageBox>
+#include <QThread>
 #include"rtcp.h"
 
 
@@ -32,6 +33,7 @@ SendFileDialog::~SendFileDialog()
 //选择文件
 void SendFileDialog::on_chooseFileBtn_clicked()
 {
+    qDebug()<<QThread::currentThread();
     QString fileName = QFileDialog::getOpenFileName(this,"选择文件");
     if(fileName.isEmpty()){
         return;

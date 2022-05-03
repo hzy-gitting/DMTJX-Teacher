@@ -42,11 +42,11 @@
     <enum>QListView::IconMode</enum>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>140</y>
+     <y>80</y>
      <width>141</width>
      <height>391</height>
     </rect>
@@ -74,7 +74,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton_2">
+     <widget class="QPushButton" name="screenShareBtn">
       <property name="text">
        <string>开始屏幕广播</string>
       </property>
@@ -98,6 +98,13 @@
      <widget class="QPushButton" name="pushButton_3">
       <property name="text">
        <string>远程关机</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="remoteRestartBtn">
+      <property name="text">
+       <string>远程重启</string>
       </property>
      </widget>
     </item>

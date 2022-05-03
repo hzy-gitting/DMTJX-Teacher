@@ -36,8 +36,12 @@ public:
 
 
     NetStudent *findStudentById(int stuId);
-    bool sendShutdownCommand();
-    bool sendShutdownCommand(int sId);
+    bool sendShutdownCommand(bool bRestart=false);
+    bool sendShutdownCommand(int sId,bool bRestart=false);
+    bool sendStopScreenShareCommand(int sId);
+    bool sendStopScreenShareCommand();
+    bool sendStartcreenShareCommand(int sId);
+    bool sendStartcreenShareCommand();
 private slots:
     void newConn();
 signals:

@@ -39,14 +39,14 @@ bool IEncoder::encode(AVFrame * frame)
                 // ‰≥ˆWinsock¥ÌŒÛ–≈œ¢
                 char* lpMsgBuf = NULL;
                 DWORD dw = WSAGetLastError();
-                if(FormatMessage(
+                if(FormatMessageA(
                     FORMAT_MESSAGE_ALLOCATE_BUFFER |
                     FORMAT_MESSAGE_FROM_SYSTEM |
                     FORMAT_MESSAGE_IGNORE_INSERTS,
                     NULL,
                     dw,
                     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                    (LPTSTR) &lpMsgBuf,
+                    (LPSTR) &lpMsgBuf,
                             0, NULL )){
                     qDebug()<<"WSAGetLastError()="<<dw<<" msg="<<lpMsgBuf;
                     LocalFree(lpMsgBuf);
@@ -54,7 +54,7 @@ bool IEncoder::encode(AVFrame * frame)
                 else{
                     qDebug()<<"FormatMessage fail";
                 }
-
+                size_sent = 0;
                 //exit(0);
             }
             if(size_sent != send_size){
@@ -132,6 +132,21 @@ void x264Encoder::init()
         qDebug()<<"us bind fial"<<us->errorString();
         //exit(0);
     }
+    SOCKET ns =us->socketDescriptor();
+    int sndBufSize = 1024*1024*8;
+    int osize;
+    int ret;
+    int optLen = sizeof(int);
+    ret = getsockopt(ns,SOL_SOCKET,SO_SNDBUF,(char*)&osize,&optLen);
+    if(ret){
+        qDebug()<<"getsockopt fail ret="<<ret;
+    }
+    qDebug()<<"old snd buf size="<<osize;
+    ret = setsockopt(ns,SOL_SOCKET,SO_SNDBUF,(char*)&sndBufSize,sizeof(int));
+    if(ret){
+        qDebug()<<"setsockopt fail ret="<<ret;
+    }
+
 }
 
 void x264Encoder::init_header()

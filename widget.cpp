@@ -30,14 +30,21 @@
 #include<QMenu>
 #include<QAction>
 #include<QIcon>
+#include<QPushButton>
+#include <QThread>
 #include"parametersetttingdialog.h"
 #include "systemconfigurationinfo.h"
+#include"sendscreenvideodatathread.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+
+    qDebug()<<QThread::currentThread();
+
+
     //初始化菜单
     QMenuBar *menuBar =  new QMenuBar(this);
     QMenu *functionMenu = menuBar->addMenu("功能菜单");
@@ -120,7 +127,9 @@ void Widget::studentTableAddItem(int sId,QHostAddress ip,qint32 port,char macAdd
     newItem->setText(ip.toString());
     newItem->setData(Qt::UserRole,sId);
     QByteArray macBA(macAddr,6);
+    qDebug()<<macBA.size();
     newItem->setData(Qt::UserRole+1,macBA);
+    newItem->setData(Qt::UserRole+2,ip.toString());
     QString toolTip = "ID:"+QString::number(sId)+
             "\nIP地址："+ip.toString()+
             "\n端口号："+QString::number(port)+
@@ -167,6 +176,7 @@ void Widget::uservRDRD(){
 //tcp发送
 void Widget::on_tcpSendBtn_clicked()
 {
+    qDebug()<<QThread::currentThread();
     SendFileDialog sfd;
     sfd.exec();
 }
@@ -195,17 +205,49 @@ void Widget::paintEvent(QPaintEvent *event)
 //远程关机
 void Widget::on_pushButton_3_clicked()
 {
-    if(stuIDSelectedList.size() <= 0){
-        QMessageBox::information(this,"提示","请至少选中一个学生");
+    RTCP *rtcp = RTCP::getInstance();
+    QListWidget *lw = ui->studentListWidget;
+    QList<QListWidgetItem*> selItems = lw->selectedItems();
+    QListWidgetItem *item;
+    if(selItems.size()<=0){
+        QMessageBox::information(this,"提示","请至少选择一个学生机来关机");
         return;
     }
-    for(int i = 0;i< stuIDSelectedList.size();i++){
-        RTCP *rtcp = RTCP::getInstance();
+    QString sIp;
+    for(int i=0;i<selItems.size();i++){
+        item=selItems.at(i);
+        sIp = item->data(Qt::UserRole+2).toString();
+        qDebug()<<"ip="<<sIp;
         if(!rtcp->sendShutdownCommand(stuIDSelectedList.at(i))){
             QMessageBox::information(this,"提示",
-                      "学生id="+QString::number(i)+"发送远程关机命令失败");
+                      "学生id="+QString::number(i)+"ip="+sIp+"发送远程关机命令失败");
         }
     }
+    QMessageBox::information(this,"提示","任务完成");
+}
+
+//远程重启按钮
+void Widget::on_remoteRestartBtn_clicked()
+{
+    RTCP *rtcp = RTCP::getInstance();
+    QListWidget *lw = ui->studentListWidget;
+    QList<QListWidgetItem*> selItems = lw->selectedItems();
+    QListWidgetItem *item;
+    if(selItems.size()<=0){
+        QMessageBox::information(this,"提示","请至少选择一个学生机来关机");
+        return;
+    }
+    QString sIp;
+    for(int i=0;i<selItems.size();i++){
+        item=selItems.at(i);
+        sIp = item->data(Qt::UserRole+2).toString();
+        qDebug()<<"ip="<<sIp;
+        if(!rtcp->sendShutdownCommand(stuIDSelectedList.at(i),true)){
+            QMessageBox::information(this,"提示",
+                      "学生id="+QString::number(i)+"ip="+sIp+"发送远程重启命令失败");
+        }
+    }
+    QMessageBox::information(this,"提示","任务完成");
 }
 
 //网络发现：探测在线的学生客户端，返回在线的学生ip、mac地址
@@ -233,106 +275,50 @@ void Widget::on_pushButton_4_clicked()
 //“网络对话”按钮
 void Widget::on_pushButton_5_clicked()
 {
-    TeacherSndMsgWindow *tsw = new TeacherSndMsgWindow(this);
+    TeacherSndMsgWindow *tsw = new TeacherSndMsgWindow(nullptr);
     //dlg->resize(400,200);
     tsw->show();
 }
 
-struct cap_screen_t
-{
-    HDC memdc;
-    HBITMAP hbmp;
-    unsigned char* buffer;
-    int            length;
-
-    int width;
-    int height;
-    int bitcount;
-    int left, top;
-};
-
-extern MonitorMaster::VEC_MONITOR_INFO vecMonitorListInfo;
-
-int init_cap_screen(struct cap_screen_t* sc, int indexOfMonitor = 0)
-{
-    MonitorMaster::GetAllMonitorInfo();
-    if (indexOfMonitor >= vecMonitorListInfo.size())
-        indexOfMonitor = 0;
-    DEVMODE devmode;
-    BOOL bRet;
-    BITMAPINFOHEADER bi;
-    sc->width = vecMonitorListInfo[indexOfMonitor]->nWidth;
-    sc->height = vecMonitorListInfo[indexOfMonitor]->nHeight;
-    sc->bitcount = vecMonitorListInfo[indexOfMonitor]->nBits;
-    sc->left = vecMonitorListInfo[indexOfMonitor]->area.left;
-    sc->top = vecMonitorListInfo[indexOfMonitor]->area.top;
-    memset(&bi, 0, sizeof(bi));
-    bi.biSize = sizeof(bi);
-    bi.biWidth = sc->width;
-    bi.biHeight = -sc->height; //从上朝下扫描
-    bi.biPlanes = 1;
-    bi.biBitCount = sc->bitcount; //RGB
-    bi.biCompression = BI_RGB;
-    bi.biSizeImage = 0;
-    HDC hdc = GetDC(NULL); //屏幕DC
-    sc->memdc = CreateCompatibleDC(hdc);
-    sc->buffer = NULL;
-    sc->hbmp = CreateDIBSection(hdc, (BITMAPINFO*)&bi, DIB_RGB_COLORS, (void**)&sc->buffer, NULL, 0);
-    ReleaseDC(NULL, hdc);
-    SelectObject(sc->memdc, sc->hbmp); ///
-    sc->length = sc->height* (((sc->width*sc->bitcount / 8) + 3) / 4 * 4);
-    return 0;
-}
-
-HCURSOR FetchCursorHandle()
-{
-    CURSORINFO hCur;
-    ZeroMemory(&hCur, sizeof(hCur));
-    hCur.cbSize = sizeof(hCur);
-    GetCursorInfo(&hCur);
-    return hCur.hCursor;
-}
-
-void AddCursor(HDC hMemDC, POINT origin)
-{
-
-    POINT xPoint;
-    GetCursorPos(&xPoint);
-    xPoint.x -= origin.x;
-    xPoint.y -= origin.y;
-    if (xPoint.x < 0 || xPoint.y < 0)
-        return;
-    HCURSOR hcur = FetchCursorHandle();
-    ICONINFO iconinfo;
-    BOOL ret;
-    ret = GetIconInfo(hcur, &iconinfo);
-    if (ret)
-    {
-        xPoint.x -= iconinfo.xHotspot;
-        xPoint.y -= iconinfo.yHotspot;
-        if (iconinfo.hbmMask) DeleteObject(iconinfo.hbmMask);
-        if (iconinfo.hbmColor) DeleteObject(iconinfo.hbmColor);
-    }
-    DrawIcon(hMemDC, xPoint.x, xPoint.y, hcur);
-}
-
-int blt_cap_screen(struct cap_screen_t* sc)
-{
-    HDC hdc = GetDC(NULL);
-    BitBlt(sc->memdc, 0, 0, sc->width, sc->height, hdc, sc->left, sc->top, SRCCOPY); // 截屏
-    AddCursor(sc->memdc, POINT{ sc->left, sc->top }); // 增加鼠标进去
-    ReleaseDC(NULL, hdc);
-    return 0;
-}
-
 
 //开始屏幕广播
+void Widget::on_screenShareBtn_clicked()
+{
+    static bool bStarted = false;
+    QPushButton *btn = ui->screenShareBtn;
+    btn->setEnabled(false);     //先禁用按钮
+    if(!bStarted){
+        QThread *thread = new QThread();
+        SendScreenVideoDataThread *wt = new SendScreenVideoDataThread;
+        wt->moveToThread(thread);
+        connect(this,&Widget::startScreenShare,wt,&SendScreenVideoDataThread::start);
+        connect(this,&Widget::stopScreenShare,thread,&QThread::quit);
+        thread->start();
+        emit startScreenShare();
+
+        RTCP *rtcp = RTCP::getInstance();
+        if(!rtcp->sendStartcreenShareCommand()){
+            QMessageBox::information(this,"提示","开始屏幕共享命令部分发送失败");
+        }
+
+        bStarted = true;
+        btn->setText("结束屏幕共享");
+    }else{
+        emit stopScreenShare();
+        RTCP *rtcp = RTCP::getInstance();
+        if(!rtcp->sendStopScreenShareCommand()){
+            QMessageBox::information(this,"提示","结束屏幕共享命令部分发送失败");
+        }
+        btn->setText("开始屏幕共享");
+        bStarted = false;
+    }
+    btn->setEnabled(true);      //启用按钮
+}
+
 void Widget::on_pushButton_2_clicked()
 {
-    /*QTimer *timer = new QTimer(this);
-    timer->start(10);
-    connect(timer,&QTimer::timeout,this,&Widget::on_btnSaveScreen_clicked);*/
 
+/*
     struct cap_screen_t sc;
     BYTE* out;
     AVFrame* frame;
@@ -387,7 +373,7 @@ void Widget::on_pushButton_2_clicked()
     ffmpeg264.flush(frame);
     //SDL_Quit();
     return ;
-
+*/
 }
 
 /*int main(int argc, char* argv[])
@@ -487,7 +473,14 @@ void Widget::on_remoteWakeBtn_clicked()
     char *macAddr;
     for(int i=0;i<selItems.size();i++){
         item=selItems.at(i);
-        macAddr = item->data(Qt::UserRole+1).toByteArray().data();
+        QByteArray ba = item->data(Qt::UserRole+1).toByteArray();
+        for(int i=0;i<6;i++){
+            qDebug()<<(unsigned int)(unsigned char)(ba.at(i));
+        }
+        macAddr = ba.data();
+        for(int i=0;i<6;i++){
+            qDebug()<<QString::number((unsigned int)(unsigned char)macAddr[i],16);
+        }
         QString sMac = NetworkUtils::macToString(macAddr);
         qDebug()<<"macAddr="<<sMac;
         if(!NetworkUtils::sendMagicPacket(userv,macAddr)){
@@ -519,4 +512,5 @@ void Widget::on_studentListWidget_itemSelectionChanged()
         stuIDSelectedList.append(id);
     }
 }
+
 

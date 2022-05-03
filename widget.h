@@ -41,6 +41,10 @@ private slots:
     void slotStuDisconnected(int sId);
     void on_studentListWidget_itemSelectionChanged();
 
+    void on_screenShareBtn_clicked();
+
+    void on_remoteRestartBtn_clicked();
+
 private:
     Ui::Widget *ui;
     QUdpSocket *userv;
@@ -48,5 +52,8 @@ private:
     QList<int> stuIDSelectedList;   //当前选中的学生id集合
 public:
     void paintEvent(QPaintEvent *event) override;
+signals:
+    void startScreenShare();
+    void stopScreenShare();
 };
 #endif // WIDGET_H

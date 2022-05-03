@@ -173,7 +173,7 @@ bool RTCP::sendMessage(int sId,QByteArray msg){
 }
 
 //发送关机命令
-bool RTCP::sendShutdownCommand(int sId){
+bool RTCP::sendShutdownCommand(int sId,bool bRestart){
     NetStudent *stu = findStudentById(sId);
     if(stu == nullptr){
         return false;
@@ -184,23 +184,88 @@ bool RTCP::sendShutdownCommand(int sId){
     }
     QDataStream out(s);
     out.setVersion(QDataStream::Qt_5_1);
-    out << QString("shutdown");//命令字段
+    QString cmd;
+    if(bRestart){
+        cmd = "restart";
+    }else{
+        cmd = "shutdown";
+    }
+    out << cmd;//命令字段
     QByteArray payload;
     out<<payload;   //空数据体
     out.device()->waitForBytesWritten(3000);
     return true;
 }
 //发送关机命令给所有学生
-bool RTCP::sendShutdownCommand(){
+bool RTCP::sendShutdownCommand(bool bRestart){
     bool b = true;
     for(int i=0;i<stuList.size();i++){
-        if(!sendShutdownCommand(stuList.at(i)->getStuId())){
+        if(!sendShutdownCommand(stuList.at(i)->getStuId(),bRestart)){
             b = false;
         }
     }
     return b;
 }
 
+
+
+//发送开始屏幕共享命令
+bool RTCP::sendStartcreenShareCommand(int sId){
+    NetStudent *stu = findStudentById(sId);
+    if(stu == nullptr){
+        return false;
+    }
+    QTcpSocket *s = stu->getSocket();
+    if(s->state() != QAbstractSocket::ConnectedState){
+        return false;
+    }
+    QDataStream out(s);
+    out.setVersion(QDataStream::Qt_5_1);
+    out << QString("startScreenShare");//命令字段
+    QByteArray payload;
+    out<<payload;   //空数据体
+    out.device()->waitForBytesWritten(3000);
+    return true;
+}
+
+bool RTCP::sendStartcreenShareCommand(){
+    bool b = true;
+    for(int i=0;i<stuList.size();i++){
+        if(!sendStartcreenShareCommand(stuList.at(i)->getStuId())){
+            b = false;
+        }
+    }
+    return b;
+}
+
+//发送结束屏幕共享命令
+bool RTCP::sendStopScreenShareCommand(int sId){
+    NetStudent *stu = findStudentById(sId);
+    if(stu == nullptr){
+        return false;
+    }
+    QTcpSocket *s = stu->getSocket();
+    if(s->state() != QAbstractSocket::ConnectedState){
+        return false;
+    }
+    QDataStream out(s);
+    out.setVersion(QDataStream::Qt_5_1);
+    out << QString("stopScreenShare");//命令字段
+    QByteArray payload;
+    out<<payload;   //空数据体
+    out.device()->waitForBytesWritten(3000);
+    return true;
+}
+
+bool RTCP::sendStopScreenShareCommand(){
+    bool b = true;
+    for(int i=0;i<stuList.size();i++){
+        if(!sendStopScreenShareCommand(stuList.at(i)->getStuId())){
+            b = false;
+        }
+    }
+    return b;
+}
 
 NetStudent *RTCP::findStudentById(int stuId)
 {

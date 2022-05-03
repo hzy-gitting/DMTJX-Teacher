@@ -4,6 +4,7 @@
 #include"rtcp.h"
 #include<QSettings>
 #include"systemconfigurationinfo.h"
+#include<QThread>
 
 
 int main(int argc, char *argv[])
@@ -11,6 +12,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     setbuf(stdout, NULL);
 
+    qDebug()<<QThread::currentThread();
     //初始化系统信息
     SystemInfo::initialize();
 
@@ -27,5 +29,8 @@ int main(int argc, char *argv[])
 
     Widget w;
     w.show();
-    return a.exec();
+    a.exec();
+
+    qDebug()<<"消息循环退出";
+    return 0;
 }

@@ -25,6 +25,7 @@ SOURCES += \
     rgb2yuv.cpp \
     rtcp.cpp \
     sendfiledialog.cpp \
+    sendscreenvideodatathread.cpp \
     systemconfigurationinfo.cpp \
     teachersndmsgwindow.cpp \
     widget.cpp
@@ -50,6 +51,7 @@ HEADERS += \
     rgb2yuv.h \
     rtcp.h \
     sendfiledialog.h \
+    sendscreenvideodatathread.h \
     systemconfigurationinfo.h \
     teachersndmsgwindow.h \
     widget.h
