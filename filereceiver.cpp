@@ -1,4 +1,5 @@
 #include "filereceiver.h"
+#include"systemconfigurationinfo.h"
 
 FileReceiver::FileReceiver(QObject *parent) : QObject(parent)
 {
@@ -7,13 +8,15 @@ FileReceiver::FileReceiver(QObject *parent) : QObject(parent)
 FileReceiver::FileReceiver(QList<QString> fileList,QList<qint64> fileSizeList){
     n = 0;
     state = 0;
+    QSettings *setting = SystemInfo::getSettings();
+    QString fileRcvDir = setting->value("fileRcvPath").toString();
     for(int i=0;i<fileList.size();i++){
         fileRcv fr;
         QString fileName = fileList.at(i);
         fr.name = fileName.sliced(fileName.lastIndexOf('/')+1);
         fr.size = fileSizeList.at(i);
         fr.sizeLeft = fr.size;
-        QString fileRcvDir = "E:/teacherRcv/";
+
         fr.f = new QFile(fileRcvDir+fr.name);
         if(!fr.f->open(QIODevice::WriteOnly)){
             qDebug()<<"打开"<<fr.f->fileName()<<"失败";

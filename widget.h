@@ -4,7 +4,7 @@
 #include <QWidget>
 #include<QUdpSocket>
 #include<QTcpSocket>
-#include"network/networkcommunicationsystem.h"
+#include"networkmessagelist.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -45,9 +45,12 @@ private slots:
 
     void on_remoteRestartBtn_clicked();
 
+    void slotNewMessage();
+    void tfinish();
 private:
     Ui::Widget *ui;
     QUdpSocket *userv;
+    NetworkMessageList *nm;
 
     QList<int> stuIDSelectedList;   //当前选中的学生id集合
 public:

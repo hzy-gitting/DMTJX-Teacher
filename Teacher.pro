@@ -18,8 +18,10 @@ SOURCES += \
     ffmpegEncoder.cpp \
     filereceiver.cpp \
     main.cpp \
+    netmessage.cpp \
     netstudent.cpp \
     network/networkcommunicationsystem.cpp \
+    networkmessagelist.cpp \
     networkutils.cpp \
     parametersetttingdialog.cpp \
     rgb2yuv.cpp \
@@ -44,8 +46,10 @@ HEADERS += \
     ffmpeg.h \
     ffmpegEncoder.h \
     filereceiver.h \
+    netmessage.h \
     netstudent.h \
     network/networkcommunicationsystem.h \
+    networkmessagelist.h \
     networkutils.h \
     parametersetttingdialog.h \
     rgb2yuv.h \

@@ -35,6 +35,7 @@ public slots:
     void slotErrorOccurred(QAbstractSocket::SocketError socketError);
 signals:
     void sigDisconnected(int sId);
+    void sigNewMessage(const QByteArray&msgContent,const QHostAddress &senderAddr);   //新消息信号
 };
 
 #endif // NETSTUDENT_H

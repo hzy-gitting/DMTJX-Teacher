@@ -16,8 +16,8 @@
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>
-     <x>250</x>
-     <y>100</y>
+     <x>240</x>
+     <y>20</y>
      <width>401</width>
      <height>321</height>
     </rect>
@@ -26,8 +26,8 @@
   <widget class="QListWidget" name="studentListWidget">
    <property name="geometry">
     <rect>
-     <x>680</x>
-     <y>130</y>
+     <x>690</x>
+     <y>40</y>
      <width>301</width>
      <height>281</height>
     </rect>
@@ -109,6 +109,16 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QTextEdit" name="msgRcvEdit">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>370</y>
+     <width>391</width>
+     <height>191</height>
+    </rect>
+   </property>
   </widget>
  </widget>
  <resources/>

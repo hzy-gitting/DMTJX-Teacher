@@ -23,11 +23,14 @@ private slots:
 
     void on_closeBtn_clicked();
 
+    void on_browseFileBtn_clicked();
+
 private:
     Ui::ParameterSetttingDialog *ui;
 
     QHostAddress ipAddr;
     QString macAddr;
+    QString fileRcvDir;
 
     void showNetworkAdapterList();
 };

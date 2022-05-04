@@ -5,6 +5,7 @@
 #include"ffmpegEncoder.h"
 #include"MonitorMaster.h"
 
+#include <QApplication>
 #include<QThread>
 
 #define SS_DEBUG 0
@@ -119,7 +120,7 @@ void SendScreenVideoDataThread::start(){
     // 以下为3个不同的编码器，任选一个即可
     x264Encoder ffmpeg264(sc.width, sc.height,  "save.h264"); // save.h264为本地录屏文件 可以使用vlc播放器播放
 
-    for (int i = 0; ; i++)
+    for (int i = 0;!QThread::currentThread()->isInterruptionRequested() ; i++)
     {
         blt_cap_screen(&sc);//20-30ms 我认为可以单独使用一个线程专门来截屏，提高帧率
 
@@ -144,5 +145,6 @@ void SendScreenVideoDataThread::start(){
 
     }
     ffmpeg264.flush(frame);
+    qDebug()<<"SendScreenVideoDataThread return;" << QThread::currentThread();
     return ;
 }

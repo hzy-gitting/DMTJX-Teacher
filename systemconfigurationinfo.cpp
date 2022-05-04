@@ -62,7 +62,7 @@ bool SystemInfo::initialize()
     if(macAddr.isEmpty()){
         return true;
     }
-    //查找所有网络接口信息
+    //找到使用的网卡绑定的IP地址
     QList ifs = QNetworkInterface::allInterfaces();
     QNetworkAddressEntry addrEntry;
     for(int i=0;i<ifs.size();i++){

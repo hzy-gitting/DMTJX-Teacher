@@ -86,6 +86,11 @@ void NetStudent::slotReadyRead(){
         qDebug()<<"收到文件数据";
         frcver->writeFile(payload);
     }
+    else if(cmd == "msg"){
+        qDebug()<<"收到网络消息";
+        //将消息信号传递给RTCP
+        emit sigNewMessage(payload,socket->peerAddress());
+    }
     if(socket->bytesAvailable()){
         slotReadyRead();
     }

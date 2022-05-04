@@ -47,6 +47,7 @@ private slots:
 signals:
     void newStudentConnection(int sId,QHostAddress ip,qint32 port,char macAddr[]);
     void sigStuDisconnected(int sId);
+    void sigNewMessage(const QByteArray&msgContent,const QHostAddress &senderAddr);   //rtcp新消息信号
 };
 
 #endif // RTCP_H

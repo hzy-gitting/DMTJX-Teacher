@@ -25,8 +25,8 @@ bool IEncoder::encode(AVFrame * frame)
 	}
 	if (got_output)
 	{
-        /*if (fp_out != NULL)
-            fwrite(pkt.data, 1, pkt.size, fp_out);*/
+        if (fp_out != NULL)
+            fwrite(pkt.data, 1, pkt.size, fp_out);
         pktsizeLeft = pkt.size;
         char *dp = (char*)pkt.data;
         qDebug()<<"writeDatagram "<<QTime::currentTime();
@@ -107,12 +107,12 @@ void x264Encoder::init()
 		fp_out = fopen(filename, "wb");
 	pCodec = avcodec_find_encoder(AV_CODEC_ID_H264);
 	pCodecCtx = avcodec_alloc_context3(pCodec);
-	pCodecCtx->bit_rate = 4 * 1024 * 1024;
+    pCodecCtx->bit_rate = 4 * 1024 * 1024;
 	pCodecCtx->width = width;
 	pCodecCtx->height = height;
 	pCodecCtx->frame_number = 1;
 	pCodecCtx->time_base.num = 1;
-    pCodecCtx->time_base.den = 25; // fps
+    pCodecCtx->time_base.den = 60; // fps
 	pCodecCtx->gop_size = 10;
 	pCodecCtx->max_b_frames = 0;
 	pCodecCtx->pix_fmt = AV_PIX_FMT_YUV420P;
@@ -132,16 +132,10 @@ void x264Encoder::init()
         qDebug()<<"us bind fial"<<us->errorString();
         //exit(0);
     }
+    //Windows系统默认发送缓冲区大小为65536 2^16
     SOCKET ns =us->socketDescriptor();
     int sndBufSize = 1024*1024*8;
-    int osize;
     int ret;
-    int optLen = sizeof(int);
-    ret = getsockopt(ns,SOL_SOCKET,SO_SNDBUF,(char*)&osize,&optLen);
-    if(ret){
-        qDebug()<<"getsockopt fail ret="<<ret;
-    }
-    qDebug()<<"old snd buf size="<<osize;
     ret = setsockopt(ns,SOL_SOCKET,SO_SNDBUF,(char*)&sndBufSize,sizeof(int));
     if(ret){
         qDebug()<<"setsockopt fail ret="<<ret;

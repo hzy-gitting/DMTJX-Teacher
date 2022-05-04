@@ -35,6 +35,8 @@
 #include"parametersetttingdialog.h"
 #include "systemconfigurationinfo.h"
 #include"sendscreenvideodatathread.h"
+#include"networkmessagelist.h"
+#include"netmessage.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -64,6 +66,8 @@ Widget::Widget(QWidget *parent)
 
     connect(RTCP::getInstance(),&RTCP::sigStuDisconnected,
                 this,&Widget::slotStuDisconnected);
+    nm = NetworkMessageList::getInstance();
+    connect(nm,&NetworkMessageList::newMessage,this,&Widget::slotNewMessage);
 
 
     ui->tableWidget->setColumnCount(4);
@@ -108,6 +112,28 @@ Widget::~Widget()
 {
     delete ui;
 }
+
+void Widget::slotNewMessage(){
+    qDebug()<<__FUNCTION__;
+    QList< NetMessage> msgList =  nm->getAllMessage();
+    qDebug()<<"getAllMessage";
+    QString ss;
+    NetMessage msg;
+    for(int i=0;i<msgList.size();i++){
+        const NetMessage &msg = msgList.at(i);
+        ss+="学生(";
+        ss+=msg.getSenderAddr().toString();
+        ss+=") ";
+        ss+=msg.getDateTime().toString("yyyy-MM-dd HH:mm:ss");
+        ss+="\n    ";
+        ss+=msg.getContent();
+        ss+="\n";
+    }
+    ui->msgRcvEdit->setPlainText(ss);
+    ui->msgRcvEdit->moveCursor(QTextCursor::End);
+    qDebug()<<__FUNCTION__ <<" end";
+}
+
 void Widget::studentTableAddItem(int sId,QHostAddress ip,qint32 port,char macAddr[]){
 
     QString sMac = NetworkUtils::macToString(macAddr);
@@ -146,7 +172,7 @@ void Widget::slotStuDisconnected(int sId){
 }
 //参数设置
 void Widget::setUpParam(){
-    qDebug()<<"进行参数设置";
+    qInfo()<<"进行参数设置";
     ParameterSetttingDialog dlg;
     dlg.exec();
 }
@@ -176,7 +202,7 @@ void Widget::uservRDRD(){
 //tcp发送
 void Widget::on_tcpSendBtn_clicked()
 {
-    qDebug()<<QThread::currentThread();
+    qInfo()<<"打开文件发送窗口";
     SendFileDialog sfd;
     sfd.exec();
 }
@@ -205,6 +231,7 @@ void Widget::paintEvent(QPaintEvent *event)
 //远程关机
 void Widget::on_pushButton_3_clicked()
 {
+    qInfo()<<"点击远程关机按钮";
     RTCP *rtcp = RTCP::getInstance();
     QListWidget *lw = ui->studentListWidget;
     QList<QListWidgetItem*> selItems = lw->selectedItems();
@@ -229,6 +256,7 @@ void Widget::on_pushButton_3_clicked()
 //远程重启按钮
 void Widget::on_remoteRestartBtn_clicked()
 {
+    qInfo()<<"点击远程重启按钮";
     RTCP *rtcp = RTCP::getInstance();
     QListWidget *lw = ui->studentListWidget;
     QList<QListWidgetItem*> selItems = lw->selectedItems();
@@ -275,23 +303,30 @@ void Widget::on_pushButton_4_clicked()
 //“网络对话”按钮
 void Widget::on_pushButton_5_clicked()
 {
+    qInfo()<<"打开网络对话窗口";
     TeacherSndMsgWindow *tsw = new TeacherSndMsgWindow(nullptr);
     //dlg->resize(400,200);
     tsw->show();
 }
 
 
-//开始屏幕广播
+//开始屏幕共享
 void Widget::on_screenShareBtn_clicked()
 {
+
     static bool bStarted = false;
+    static QThread *thread;
+    static SendScreenVideoDataThread *wt;
     QPushButton *btn = ui->screenShareBtn;
     btn->setEnabled(false);     //先禁用按钮
     if(!bStarted){
-        QThread *thread = new QThread();
-        SendScreenVideoDataThread *wt = new SendScreenVideoDataThread;
+        qInfo()<<"开始屏幕共享";
+        thread = new QThread();
+        wt = new SendScreenVideoDataThread;
         wt->moveToThread(thread);
         connect(this,&Widget::startScreenShare,wt,&SendScreenVideoDataThread::start);
+        connect(thread,&QThread::finished,this,&Widget::tfinish);
+
         connect(this,&Widget::stopScreenShare,thread,&QThread::quit);
         thread->start();
         emit startScreenShare();
@@ -304,7 +339,12 @@ void Widget::on_screenShareBtn_clicked()
         bStarted = true;
         btn->setText("结束屏幕共享");
     }else{
+        qInfo()<<"结束屏幕共享";
+        thread->requestInterruption();
         emit stopScreenShare();
+        thread->wait();
+        delete thread;
+        delete wt;
         RTCP *rtcp = RTCP::getInstance();
         if(!rtcp->sendStopScreenShareCommand()){
             QMessageBox::information(this,"提示","结束屏幕共享命令部分发送失败");
@@ -314,7 +354,9 @@ void Widget::on_screenShareBtn_clicked()
     }
     btn->setEnabled(true);      //启用按钮
 }
-
+void Widget::tfinish(){
+    qDebug()<<__FUNCTION__;
+}
 void Widget::on_pushButton_2_clicked()
 {
 
@@ -447,6 +489,7 @@ void Widget::on_pushButton_2_clicked()
 //查看学生提交的作业（打开文件接收目录）
 void Widget::on_openFileRcvDirBtn_clicked()
 {
+    qInfo()<<"查看学生提交的作业";
     ShellExecuteA(NULL,"open",NULL,NULL,"E:/teacherRcv",SW_SHOWNORMAL);
 }
 
@@ -463,6 +506,7 @@ void Widget::on_remoteWakeBtn_clicked()
     有时数据包内还会紧接着4-6字节的密码信息。这个帧片段可以包含在任何协议中
     ，最常见的是包含在 UDP 中。*/
 
+    qInfo()<<"点击远程开机按钮";
     QListWidget *lw = ui->studentListWidget;
     QList<QListWidgetItem*> selItems = lw->selectedItems();
     QListWidgetItem *item;
@@ -497,7 +541,7 @@ void Widget::on_remoteWakeBtn_clicked()
 
 void Widget::on_studentListWidget_itemSelectionChanged()
 {
-    qDebug()<<__FUNCTION__;
+    qInfo()<<"更改学生选择";
     QListWidget *lw = ui->studentListWidget;
     QList<QListWidgetItem*> selItems = lw->selectedItems();
     QListWidgetItem *item;

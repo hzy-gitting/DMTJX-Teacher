@@ -62,6 +62,42 @@
     <string>关闭</string>
    </property>
   </widget>
+  <widget class="QLineEdit" name="fileRcvPathEdit">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>400</y>
+     <width>341</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>400</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>文件接收位置</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="browseFileBtn">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>400</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>浏览</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

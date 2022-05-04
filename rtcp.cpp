@@ -57,6 +57,7 @@ void RTCP::newConn(){
         connect(s,&QTcpSocket::readyRead,stu,&NetStudent::slotReadyRead);
         connect(s,&QTcpSocket::errorOccurred,stu,&NetStudent::slotErrorOccurred);
         connect(stu,&NetStudent::sigDisconnected,this,&RTCP::sigStuDisconnected);
+        connect(stu,&NetStudent::sigNewMessage,this,&RTCP::sigNewMessage);
         /*SOCKET nativeSkt = s->socketDescriptor();
         char chOpt = 1;
         int ret = setsockopt(nativeSkt,IPPROTO_TCP,TCP_NODELAY,&chOpt,sizeof(char));
