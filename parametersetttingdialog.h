@@ -32,6 +32,9 @@ private:
     QString macAddr;
     QString fileRcvDir;
 
+    quint16 videoPort;
+    quint16 RTCPPort;
+
     void showNetworkAdapterList();
 };
 

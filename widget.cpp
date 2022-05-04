@@ -280,18 +280,21 @@ void Widget::on_remoteRestartBtn_clicked()
 
 //网络发现：探测在线的学生客户端，返回在线的学生ip、mac地址
 void Widget::stuDetect(){
-    //1发送探测包
-    //QUdpSocket *udp = new QUdpSocket();
+    //发送探测包
     QNetworkDatagram *dg = new QNetworkDatagram();//udp最大发送报文长度大概在65500左右
-    dg->setData(QByteArray("detect"));
-    //dg->setSender(QHostAddress("192.168.173.1"),12345);
-
+    QByteArray ba;
+    QDataStream out(&ba,QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_1);
+    out<<QString("detect");
+    quint16 rtcpPort = SystemInfo::getSettings()->value("RTCP_port").toUInt();
+    out<<rtcpPort;
+    dg->setData(ba);
+    qDebug()<<"data size"<<ba.size();
     dg->setDestination(QHostAddress::Broadcast,8900);//探测端口默认8900，ip为受限广播地址，只探测本网段所有主机
     if(-1 == userv->writeDatagram(*dg)){
         qDebug()<<"detect fail:"<<userv->error();
     }
-
-    //2检测应答包
+    delete dg;
 
 }
 //学生探测按钮
@@ -357,140 +360,14 @@ void Widget::on_screenShareBtn_clicked()
 void Widget::tfinish(){
     qDebug()<<__FUNCTION__;
 }
-void Widget::on_pushButton_2_clicked()
-{
 
-/*
-    struct cap_screen_t sc;
-    BYTE* out;
-    AVFrame* frame;
-    time_t start, end;
 
-    ffmpeg_init();
-    init_cap_screen(&sc, 1);  // 1代表第二块显示器，0代表第一块显示器，依次类推，如果显示器数量不足则为0
-    out = (BYTE*)malloc(sc.length);
-
-    // SDLMaster::init(sc.width, sc.height); // SDL播放器，可以用于播放测试
-    YUVencoder enc(sc.width, sc.height);
-
-    // 以下为3个不同的编码器，任选一个即可
-    x264Encoder ffmpeg264(sc.width, sc.height,  "save.h264"); // save.h264为本地录屏文件 可以使用vlc播放器播放
-    //mpeg1Encoder ffmpegmpeg1(sc.width, sc.height, "save.mpg");
-    //libx264Master libx264(sc.width, sc.height, "save2.h264");
-
-    time(&start);
-    for (int i = 0; ; i++)
-    {
-        blt_cap_screen(&sc);//20-30ms 我认为可以单独使用一个线程专门来截屏，提高帧率
-         qDebug()<<"blt_cap_screen end "<<QTime::currentTime();
-
-        frame = enc.encode(sc.buffer, sc.length, sc.width, sc.height, out, sc.length);	//rgb转yuv 8ms
-
-        qDebug()<<"rgb2yuv end "<<QTime::currentTime();
-
-        if (frame == NULL)
-        {
-            printf("Encoder error!!\n"); Sleep(1000); continue;
-        }
-
-        // 一下是3种编码方式，任选一种均可
-        ffmpeg264.encode(frame);	//h.264视频编码，保存到文件       瓶颈2：网络速率 50-500-1000ms  qt的网络封装导致速度慢？
-
-        qDebug()<<"teac enc end "<<QTime::currentTime();
-
-        QApplication::processEvents();
-
-        // ffmpegmpeg1.encode(frame);
-        // libx264.encode(frame);
-
-        // SDL播放器播放视频，取消注释即可播放
-         //SDLMaster::updateScreen(frame);
-
-    }
-    fflush(stdout);
-    qDebug()<<".@#$%^&*()_+.";
-    time(&end);
-    printf("%f\n", difftime(end, start));
-    fflush(stdout);
-    ffmpeg264.flush(frame);
-    //SDL_Quit();
-    return ;
-*/
-}
-
-/*int main(int argc, char* argv[])
-{
-    struct cap_screen_t sc;
-    BYTE* out;
-    AVFrame* frame;
-    web_stream* web = new web_stream;
-    time_t start, end;
-    WSADATA d;
-
-    ffmpeg_init();
-    init_cap_screen(&sc, 1);  // 1代表第二块显示器，0代表第一块显示器，依次类推，如果显示器数量不足则为0
-    out = (BYTE*)malloc(sc.length);
-
-     SDLMaster::init(sc.width, sc.height); // SDL播放器，可以用于播放测试
-    YUVencoder enc(sc.width, sc.height);
-
-    // 以下为3个不同的编码器，任选一个即可
-    x264Encoder ffmpeg264(sc.width, sc.height,  "save.h264"); // save.h264为本地录屏文件 可以使用vlc播放器播放
-    //mpeg1Encoder ffmpegmpeg1(sc.width, sc.height, "save.mpg");
-    //libx264Master libx264(sc.width, sc.height, "save2.h264");
-
-    WSAStartup(0x0202, &d);
-    web->start("0.0.0.0", 8000); // 8000端口侦听
-    time(&start);
-    FILE* fp1 = fopen("sc.y", "wb");
-    if (!fp1) {
-        printf("fopen fail");
-        return -1;
-    }
-    for (int i = 0; i < 200; i++)
-    {
-        blt_cap_screen(&sc);//20-30ms 我认为可以单独使用一个线程专门来截屏，提高帧率
-        char* buf = NULL;
-        dp_frame_t a;
-        a.bitcount = 32;
-        a.buffer = (char*)sc.buffer;
-        a.line_bytes = sc.width * sc.bitcount / 8;
-        a.line_stride = (a.line_bytes + 3) / 4 * 4;
-        a.cx = sc.width;
-        a.cy = sc.height;
-        web->frame(&a);  // 发送帧
-
-        frame = enc.encode(sc.buffer, sc.length, sc.width, sc.height, out, sc.length);	//rgb转yuv 8ms
-
-        fwrite(frame->data[0], sc.width * sc.height, 1, fp1);
-        if (frame == NULL)
-        {
-            printf("Encoder error!!\n"); Sleep(1000); continue;
-        }
-
-        // 一下是3种编码方式，任选一种均可
-        ffmpeg264.encode(frame);	//h.264视频编码，保存到文件
-        // ffmpegmpeg1.encode(frame);
-        // libx264.encode(frame);
-
-        // SDL播放器播放视频，取消注释即可播放
-         SDLMaster::updateScreen(frame);
-
-        free(buf);
-    }
-    fclose(fp1);
-    time(&end);
-    printf("%f\n", difftime(end, start));
-    //ffmpeg264.flush(frame, &sender);
-    SDL_Quit();
-    return 0;
-}
-*/
 //查看学生提交的作业（打开文件接收目录）
 void Widget::on_openFileRcvDirBtn_clicked()
 {
     qInfo()<<"查看学生提交的作业";
-    ShellExecuteA(NULL,"open",NULL,NULL,"E:/teacherRcv",SW_SHOWNORMAL);
+    QString dir = SystemInfo::getSettings()->value("fileRcvPath").toString();
+    ShellExecuteA(NULL,"open",NULL,NULL,dir.toLocal8Bit().data(),SW_SHOWNORMAL);
 }
 
 //远程开机

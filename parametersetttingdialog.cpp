@@ -3,6 +3,7 @@
 #include<QNetworkInterface>
 #include"systemconfigurationinfo.h"
 #include<QFileDialog>
+#include <QMessageBox>
 
 ParameterSetttingDialog::ParameterSetttingDialog(QWidget *parent) :
     QDialog(parent),
@@ -14,8 +15,23 @@ ParameterSetttingDialog::ParameterSetttingDialog(QWidget *parent) :
     QSettings *setting = SystemInfo::getSettings();
     fileRcvDir = setting->value("fileRcvPath").toString();
     macAddr = setting->value("macAddr").toString();
-    ui->fileRcvPathEdit->setText(fileRcvDir);
 
+    bool bOk;
+    videoPort = setting->value("Vedio_port").toUInt(&bOk);  //屏幕共享端口号
+    if(!bOk){
+        qDebug()<<"videoPort toUint not ok";
+        videoPort = 0;
+    }
+    RTCPPort = setting->value("RTCP_port").toUInt(&bOk);  //RTCP协议端口号
+    if(!bOk){
+        qDebug()<<"RTCPPort toUint not ok";
+        RTCPPort = 0;
+    }
+    ui->screenSharePortEdit->setInputMask("0000");
+    ui->RTCPPortEdit->setInputMask("0000");
+    ui->fileRcvPathEdit->setText(fileRcvDir);
+    ui->screenSharePortEdit->setText(QString::number(videoPort));
+    ui->RTCPPortEdit->setText(QString::number(RTCPPort));
     showNetworkAdapterList();
 }
 
@@ -77,9 +93,27 @@ void ParameterSetttingDialog::on_networkAdapterList_itemSelectionChanged()
 void ParameterSetttingDialog::on_saveSettingBtn_clicked()
 {
     QSettings *setting = SystemInfo::getSettings();
-    //连接教室局域网的网卡硬件地址
-    setting->setValue("macAddr",this->macAddr);
+
+    setting->setValue("macAddr",this->macAddr);     //连接教室局域网的网卡硬件地址
     setting->setValue("fileRcvPath",this->fileRcvDir);  //文件接收位置
+
+    bool bOk;
+    this->videoPort = ui->screenSharePortEdit->text().toUInt(&bOk);
+    if(!bOk){
+        qDebug()<<"videoPort touint not ok";
+        QMessageBox::information(this,"提示","端口号输入非法，请输入数字");
+        return;
+    }
+    setting->setValue("Vedio_port",this->videoPort);  //屏幕共享端口号
+
+    this->RTCPPort = ui->RTCPPortEdit->text().toUInt(&bOk);
+    if(!bOk){
+        qDebug()<<"RTCPPort touint not ok";
+        QMessageBox::information(this,"提示","端口号输入非法，请输入数字");
+        return;
+    }
+    setting->setValue("RTCP_port",this->RTCPPort);  //RTCP协议端口号
+
     close();    //关闭窗口
 }
 

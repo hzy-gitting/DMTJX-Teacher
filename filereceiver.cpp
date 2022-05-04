@@ -17,7 +17,7 @@ FileReceiver::FileReceiver(QList<QString> fileList,QList<qint64> fileSizeList){
         fr.size = fileSizeList.at(i);
         fr.sizeLeft = fr.size;
 
-        fr.f = new QFile(fileRcvDir+fr.name);
+        fr.f = new QFile(fileRcvDir+"/"+fr.name);
         if(!fr.f->open(QIODevice::WriteOnly)){
             qDebug()<<"打开"<<fr.f->fileName()<<"失败";
         }

@@ -26,10 +26,10 @@
   <widget class="QListWidget" name="studentListWidget">
    <property name="geometry">
     <rect>
-     <x>690</x>
-     <y>40</y>
-     <width>301</width>
-     <height>281</height>
+     <x>680</x>
+     <y>20</y>
+     <width>501</width>
+     <height>551</height>
     </rect>
    </property>
    <property name="defaultDropAction">
@@ -113,11 +113,24 @@
   <widget class="QTextEdit" name="msgRcvEdit">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>370</y>
-     <width>391</width>
+     <x>240</x>
+     <y>380</y>
+     <width>401</width>
      <height>191</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>360</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>学生的消息</string>
    </property>
   </widget>
  </widget>
