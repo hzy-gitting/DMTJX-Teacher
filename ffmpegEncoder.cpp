@@ -9,7 +9,7 @@
 
 bool IEncoder::encode(AVFrame * frame)
 {
-    const int UDP_MAX_DG_LEN = 500;
+    const int UDP_MAX_DG_LEN = 1000;
     int send_size = 0;
     int size_sent = 0;
     int pktsizeLeft = 0;
@@ -95,9 +95,7 @@ bool IEncoder::flush(AVFrame * frame)
 			av_free_packet(&pkt);
 		}
 	}
-	fclose(fp_out);
-	avcodec_close(pCodecCtx);
-	av_free(pCodecCtx);
+    fclose(fp_out);
 	return true;
 }
 
@@ -107,7 +105,7 @@ void x264Encoder::init()
 		fp_out = fopen(filename, "wb");
 	pCodec = avcodec_find_encoder(AV_CODEC_ID_H264);
 	pCodecCtx = avcodec_alloc_context3(pCodec);
-    pCodecCtx->bit_rate = 4 * 1024 * 1024;
+    pCodecCtx->bit_rate = 20 * 1024 * 1024;
 	pCodecCtx->width = width;
 	pCodecCtx->height = height;
 	pCodecCtx->frame_number = 1;
@@ -198,7 +196,11 @@ x264Encoder::x264Encoder(int width2, int height2, const char * filename2)
 
 x264Encoder::~x264Encoder()
 {
+    if(pCodecCtx){
+        avcodec_free_context(&pCodecCtx);
+    }
     fclose(fp_out);
+
 }
 
 void mpeg1Encoder::init()

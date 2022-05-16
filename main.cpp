@@ -54,7 +54,6 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     setbuf(stdout, NULL);
 
-    qDebug()<<QThread::currentThread();
     //初始化系统信息
     SystemInfo::initialize();
 
@@ -79,6 +78,5 @@ int main(int argc, char *argv[])
     w.show();
     a.exec();
 
-    qDebug()<<"消息循环退出";
     return 0;
 }

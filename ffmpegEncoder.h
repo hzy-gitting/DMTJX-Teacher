@@ -14,8 +14,8 @@ protected:
 	char filename[256];
 	int got_output;
 	int width, height;
-    QUdpSocket *us;
 
+    QUdpSocket *us;
 	virtual void init() = 0;
 
 public:
@@ -26,6 +26,7 @@ public:
 class x264Encoder: public IEncoder
 {
 protected:
+
 	void init();
 	void init_header();
 public:

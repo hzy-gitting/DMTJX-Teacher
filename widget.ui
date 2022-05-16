@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1245</width>
+    <width>1203</width>
     <height>600</height>
    </rect>
   </property>
@@ -26,7 +26,7 @@
   <widget class="QListWidget" name="studentListWidget">
    <property name="geometry">
     <rect>
-     <x>680</x>
+     <x>650</x>
      <y>20</y>
      <width>501</width>
      <height>551</height>
@@ -53,13 +53,6 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QPushButton" name="pushButton_4">
-      <property name="text">
-       <string>学生探测</string>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QPushButton" name="pushButton_5">
       <property name="text">
        <string>网络对话</string>
@@ -68,6 +61,15 @@
     </item>
     <item>
      <widget class="QPushButton" name="tcpSendBtn">
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 0, 255);
+background-color: qconicalgradient(cx:0.5, cy:0.5, angle:0, stop:0 rgba(35, 40, 3, 255), stop:0.16 rgba(136, 106, 22, 255), stop:0.225 rgba(166, 140, 41, 255), stop:0.285 rgba(204, 181, 74, 255), stop:0.345 rgba(235, 219, 102, 255), stop:0.415 rgba(245, 236, 112, 255), stop:0.52 rgba(209, 190, 76, 255), stop:0.57 rgba(187, 156, 51, 255), stop:0.635 rgba(168, 142, 42, 255), stop:0.695 rgba(202, 174, 68, 255), stop:0.75 rgba(218, 202, 86, 255), stop:0.815 rgba(208, 187, 73, 255), stop:0.88 rgba(187, 156, 51, 255), stop:0.935 rgba(137, 108, 26, 255), stop:1 rgba(35, 40, 3, 255));
+alternate-background-color: rgb(170, 85, 0);
+selection-background-color: rgb(0, 255, 0);
+selection-color: rgb(85, 255, 255);
+font: 9pt &quot;黑体&quot;;
+border-color: rgb(255, 255, 127);</string>
+      </property>
       <property name="text">
        <string>发送文件</string>
       </property>

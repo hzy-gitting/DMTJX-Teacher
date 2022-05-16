@@ -8,14 +8,12 @@ public:
 	~YUVencoder();
 	YUVencoder(int w, int h);
 	AVFrame* encode(unsigned char* rgb32, int rgb32_len,
-		int width, int height,
-		unsigned char* out, int out_len);
+        int width, int height);
 
 private:
-	AVCodecContext* avctx;
+
 	AVFrame* avframe;
 	
-	AVFrame* pFrameYUV;
 	AVPicture* spic;
 	int width;
 	int height;

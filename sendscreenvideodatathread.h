@@ -9,6 +9,8 @@ class SendScreenVideoDataThread : public QObject
 public:
     explicit SendScreenVideoDataThread(QObject *parent = nullptr);
 
+private:
+    void onStop();
 public slots:
     void start();
 signals:

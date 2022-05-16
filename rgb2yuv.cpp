@@ -29,7 +29,7 @@ YUVencoder::YUVencoder(int w, int h)
 	this->avframe = frame;
 }
 
-AVFrame * YUVencoder::encode(unsigned char * rgb32, int rgb32_len, int width, int height, unsigned char * out, int out_len)
+AVFrame * YUVencoder::encode(unsigned char * rgb32, int rgb32_len, int width, int height)
 {
 	SwsContext* sws_ctx = NULL;
 	AVPixelFormat fmt = AV_PIX_FMT_RGB32, fmt2 = AV_PIX_FMT_YUV420P;

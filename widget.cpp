@@ -78,20 +78,20 @@ Widget::Widget(QWidget *parent)
 
     QListWidget *stuLstWidget = ui->studentListWidget;
 
-    stuLstWidget->setGeometry(900,100,300,300);
+    //stuLstWidget->setGeometry(900,100,300,300);
     stuLstWidget->setIconSize(QSize(100,150));
     //ui->listWidget->setGridSize(QSize(100,100));
     stuLstWidget->setMovement(QListView::Snap);
     stuLstWidget->setResizeMode(QListView::Adjust);
     stuLstWidget->setSpacing(20);
     QListWidgetItem *imageItem = new QListWidgetItem;
-    imageItem->setIcon(QIcon("E:/g.jpg"));
-    imageItem->setText("gg1");
+    imageItem->setIcon(QIcon("E:/g.png"));
+    imageItem->setText("小明");
     imageItem->setToolTip("ip:1.1.3.4");
     stuLstWidget->addItem(imageItem);
     imageItem = new QListWidgetItem;
-    imageItem->setIcon(QIcon("E:/g.jpg"));
-    imageItem->setText("gg2");
+    imageItem->setIcon(QIcon("E:/g.png"));
+    imageItem->setText("小红");
     stuLstWidget->addItem(imageItem);
 
     //教师端一定要绑定到连接教室局域网的网络接口，不然发送广播包时系统可能使用其他的接口，这样就不对了
@@ -102,8 +102,9 @@ Widget::Widget(QWidget *parent)
     userv->bind(ip1,8891);
 
     connect(userv,&QUdpSocket::readyRead,this,&Widget::uservRDRD);
-
-
+    static QTimer dtimer;
+    connect(&dtimer,&QTimer::timeout,this,&Widget::stuDetect);
+    dtimer.start(3000);
     //学生探测
     stuDetect();
 }
@@ -149,7 +150,7 @@ void Widget::studentTableAddItem(int sId,QHostAddress ip,qint32 port,char macAdd
 
     QListWidget *stuLstWidget = ui->studentListWidget;
     QListWidgetItem *newItem = new QListWidgetItem;
-    newItem->setIcon(QIcon("E:/g.jpg"));
+    newItem->setIcon(QIcon("E:/g.png"));
     newItem->setText(ip.toString());
     newItem->setData(Qt::UserRole,sId);
     QByteArray macBA(macAddr,6);
@@ -289,7 +290,6 @@ void Widget::stuDetect(){
     quint16 rtcpPort = SystemInfo::getSettings()->value("RTCP_port").toUInt();
     out<<rtcpPort;
     dg->setData(ba);
-    qDebug()<<"data size"<<ba.size();
     dg->setDestination(QHostAddress::Broadcast,8900);//探测端口默认8900，ip为受限广播地址，只探测本网段所有主机
     if(-1 == userv->writeDatagram(*dg)){
         qDebug()<<"detect fail:"<<userv->error();
@@ -330,7 +330,7 @@ void Widget::on_screenShareBtn_clicked()
         connect(this,&Widget::startScreenShare,wt,&SendScreenVideoDataThread::start);
         connect(thread,&QThread::finished,this,&Widget::tfinish);
 
-        connect(this,&Widget::stopScreenShare,thread,&QThread::quit);
+        //connect(this,&Widget::stopScreenShare,thread,&QThread::quit);
         thread->start();
         emit startScreenShare();
 
@@ -344,7 +344,8 @@ void Widget::on_screenShareBtn_clicked()
     }else{
         qInfo()<<"结束屏幕共享";
         thread->requestInterruption();
-        emit stopScreenShare();
+        //emit stopScreenShare();
+        thread->quit();
         thread->wait();
         delete thread;
         delete wt;

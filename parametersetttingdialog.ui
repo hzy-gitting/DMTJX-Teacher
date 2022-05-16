@@ -16,8 +16,8 @@
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>40</y>
+     <x>40</x>
+     <y>30</y>
      <width>591</width>
      <height>321</height>
     </rect>
@@ -39,7 +39,7 @@
   <widget class="QPushButton" name="saveSettingBtn">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>410</x>
      <y>470</y>
      <width>93</width>
      <height>28</height>
@@ -52,7 +52,7 @@
   <widget class="QPushButton" name="closeBtn">
    <property name="geometry">
     <rect>
-     <x>460</x>
+     <x>530</x>
      <y>470</y>
      <width>93</width>
      <height>28</height>
